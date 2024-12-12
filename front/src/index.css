@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#15202b] text-white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #192734;
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1da1f2;
+    border-radius: 5px;
+    border: 3px solid #192734;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #1a91da;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
