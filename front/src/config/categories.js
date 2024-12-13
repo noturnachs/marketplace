@@ -28,7 +28,7 @@ export const categories = [
   },
   {
     id: "entertainment",
-    name: "Ent. Prems",
+    name: "Streaming Accounts",
     icon: HiFilm,
     color: "text-red-500",
   },
