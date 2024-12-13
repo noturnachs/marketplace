@@ -16,13 +16,13 @@ import {
 export const categories = [
   {
     id: "ai_apps",
-    name: "AI Sites/Apps",
+    name: "AI Sites/Apps/Accounts",
     icon: HiSparkles,
     color: "text-purple-500",
   },
   {
     id: "music",
-    name: "Music Prems",
+    name: "Music Accounts",
     icon: HiMusicalNote,
     color: "text-green-500",
   },
@@ -34,25 +34,25 @@ export const categories = [
   },
   {
     id: "education",
-    name: "Educational/Office Prems",
+    name: "Educational/Office Accounts",
     icon: HiAcademicCap,
     color: "text-blue-500",
   },
   {
     id: "productivity",
-    name: "Productivity Prems",
+    name: "Productivity Accounts",
     icon: HiCommandLine,
     color: "text-yellow-500",
   },
   {
     id: "photo",
-    name: "Photo Editing Prems",
+    name: "Photo Editing Accounts",
     icon: HiPhoto,
     color: "text-pink-500",
   },
   {
     id: "vpn",
-    name: "VPN Prems",
+    name: "VPN Accounts",
     icon: HiGlobeAlt,
     color: "text-cyan-500",
   },
