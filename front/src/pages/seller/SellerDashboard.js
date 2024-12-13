@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { listingService } from "../../services/listingService";
+import { purchaseService } from "../../services/purchaseService";
 import { categories, getCategoryByName } from "../../config/categories";
 
 function SellerDashboard() {
@@ -20,10 +21,13 @@ function SellerDashboard() {
     features: [],
   });
   const [newFeature, setNewFeature] = useState("");
+  const [sales, setSales] = useState([]);
+  const [totalSales, setTotalSales] = useState(0);
 
   useEffect(() => {
     if (sellerStatus === "verified") {
       fetchListings();
+      fetchSales();
     }
   }, [sellerStatus]);
 
@@ -35,6 +39,20 @@ function SellerDashboard() {
       setError(error.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchSales = async () => {
+    try {
+      const salesData = await purchaseService.getMySales();
+      setSales(salesData);
+      const total = salesData.reduce(
+        (sum, sale) => sum + parseFloat(sale.amount),
+        0
+      );
+      setTotalSales(total);
+    } catch (error) {
+      console.error("Error fetching sales:", error);
     }
   };
 
@@ -154,7 +172,9 @@ function SellerDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-sm text-textSecondary">Total Sales</p>
-              <p className="text-2xl font-semibold text-textPrimary">₱0.00</p>
+              <p className="text-2xl font-semibold text-textPrimary">
+                ₱{totalSales.toFixed(2)}
+              </p>
             </div>
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-sm text-textSecondary">Active Listings</p>
@@ -163,12 +183,50 @@ function SellerDashboard() {
               </p>
             </div>
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-sm text-textSecondary">Completed Orders</p>
-              <p className="text-2xl font-semibold text-textPrimary">0</p>
+              <p className="text-sm text-textSecondary">Total Orders</p>
+              <p className="text-2xl font-semibold text-textPrimary">
+                {sales.length}
+              </p>
             </div>
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-sm text-textSecondary">Rating</p>
               <p className="text-2xl font-semibold text-textPrimary">N/A</p>
+            </div>
+          </div>
+
+          {/* Sales History */}
+          <div className="bg-secondary/30 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-textPrimary mb-4">
+              Recent Sales
+            </h2>
+            <div className="space-y-4">
+              {sales.length === 0 ? (
+                <p className="text-center text-textSecondary py-4">
+                  No sales yet. Your sales will appear here.
+                </p>
+              ) : (
+                sales.map((sale) => (
+                  <div
+                    key={sale.id}
+                    className="bg-secondary/50 rounded-lg p-4 flex justify-between items-center"
+                  >
+                    <div>
+                      <h3 className="font-medium text-textPrimary">
+                        {sale.listing_title}
+                      </h3>
+                      <p className="text-sm text-textSecondary">
+                        Purchased by {sale.buyer_name}
+                      </p>
+                      <p className="text-xs text-textSecondary">
+                        {new Date(sale.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <p className="text-accent font-medium">
+                      ₱{parseFloat(sale.amount).toFixed(2)}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

@@ -41,6 +41,8 @@ app.use("/api/", limiter);
 app.use("/api/v1/auth", require("./routes/authRoutes"));
 app.use("/api/v1/listings", require("./routes/listingRoutes"));
 app.use("/api/v1/payments", require("./routes/paymentRoutes"));
+app.use("/api/v1/purchases", require("./routes/purchaseRoutes"));
+app.use("/api/v1/wallet", require("./routes/walletRoutes"));
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

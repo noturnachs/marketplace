@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { listingService } from "../../../services/listingService";
+import { purchaseService } from "../../../services/purchaseService";
 import DashboardNavbar from "../../../components/DashboardNavbar";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import PurchaseConfirmationModal from "../../../components/PurchaseConfirmationModal";
+import PurchaseSuccessModal from "../../../components/PurchaseSuccessModal";
+import { walletService } from "../../../services/walletService";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -11,9 +15,14 @@ function ProductDetails() {
   const [listing, setListing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0);
 
   useEffect(() => {
     fetchListing();
+    fetchWalletBalance();
   }, [id]);
 
   const fetchListing = async () => {
@@ -27,23 +36,36 @@ function ProductDetails() {
     }
   };
 
-  const handlePurchase = (listing) => {
-    const userWallet = JSON.parse(localStorage.getItem("userWallet")) || {
-      coins: 0,
-    };
-
-    if (userWallet.coins < listing.price) {
-      alert("Insufficient coins! Please add funds to your wallet.");
-      return;
+  const fetchWalletBalance = async () => {
+    try {
+      const wallet = await walletService.getBalance();
+      setWalletBalance(wallet.coins);
+    } catch (error) {
+      console.error("Error fetching wallet balance:", error);
     }
+  };
 
-    const newBalance = userWallet.coins - listing.price;
-    localStorage.setItem(
-      "userWallet",
-      JSON.stringify({ ...userWallet, coins: newBalance })
-    );
-    alert(`Successfully purchased ${listing.title}!`);
-    navigate("/dashboard");
+  const handlePurchase = async () => {
+    try {
+      setIsPurchasing(true);
+      await purchaseService.create(id);
+      await fetchWalletBalance(); // Refresh balance
+      setShowConfirmModal(false);
+      setShowSuccessModal(true);
+    } catch (error) {
+      if (error.message.includes("insufficient")) {
+        alert("Insufficient coins! Please add funds to your wallet.");
+      } else {
+        alert(error.message);
+      }
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
+
+  // Update purchase button click handler
+  const handlePurchaseClick = () => {
+    setShowConfirmModal(true);
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -154,11 +176,12 @@ function ProductDetails() {
               <button
                 onClick={() => navigate("/dashboard")}
                 className="px-4 py-2 text-sm text-textSecondary hover:text-textPrimary transition-colors"
+                disabled={isPurchasing}
               >
                 Cancel
               </button>
               <button
-                onClick={() => handlePurchase(listing)}
+                onClick={handlePurchaseClick}
                 className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
               >
                 Purchase Now
@@ -167,6 +190,24 @@ function ProductDetails() {
           </div>
         </motion.div>
       </main>
+
+      <PurchaseConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        listing={listing}
+        currentBalance={walletBalance}
+        onConfirm={handlePurchase}
+        isPurchasing={isPurchasing}
+      />
+
+      <PurchaseSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          navigate("/dashboard");
+        }}
+        listing={listing}
+      />
     </div>
   );
 }

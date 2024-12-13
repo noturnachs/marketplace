@@ -1,26 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { listingService } from "../../services/listingService";
 import { categories, getCategoryByName } from "../../config/categories";
-import { grid } from "ldrs";
-import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 function Marketplace() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const navigate = useNavigate();
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
-  // Configure loader
-  grid.register();
-
-  const allCategory = {
-    id: "all",
-    name: "All",
-    icon: null,
-    color: "text-accent",
-  };
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchListings();
@@ -37,100 +28,80 @@ function Marketplace() {
     }
   };
 
-  const filteredListings =
-    selectedCategory === "All"
-      ? listings
-      : listings.filter((listing) => listing.category === selectedCategory);
+  const filteredListings = listings.filter((listing) => {
+    const matchesCategory =
+      selectedCategory === "all" || listing.category === selectedCategory;
+    const matchesSearch = listing.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
-  const handlePurchase = (listing) => {
-    const userWallet = JSON.parse(localStorage.getItem("userWallet")) || {
-      coins: 0,
-    };
-
-    if (userWallet.coins < listing.price) {
-      alert("Insufficient coins! Please add funds to your wallet.");
-      return;
-    }
-
-    const newBalance = userWallet.coins - listing.price;
-    localStorage.setItem(
-      "userWallet",
-      JSON.stringify({ ...userWallet, coins: newBalance })
-    );
-    alert(`Successfully purchased ${listing.title}!`);
-    navigate("/marketplace");
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-8"
-    >
-      {/* Categories */}
-      <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-textPrimary mb-4">
-          Categories
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedCategory("All")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedCategory === "All"
-                ? "bg-accent text-white"
-                : "bg-secondary/30 text-textSecondary hover:text-textPrimary"
-            }`}
-          >
-            All
-          </button>
-          {categories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.name)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                  selectedCategory === category.name
-                    ? "bg-accent text-white"
-                    : "bg-secondary/30 text-textSecondary hover:text-textPrimary"
-                }`}
-              >
-                <Icon
-                  className={`w-4 h-4 ${
-                    selectedCategory === category.name
-                      ? "text-white"
-                      : category.color
-                  }`}
-                />
-                {category.name}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Error Message */}
-      {error && (
+  if (isLoading) return <LoadingSpinner />;
+  if (error)
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center">
         <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-lg">
           {error}
         </div>
-      )}
+      </div>
+    );
 
-      {/* Loading State with ldrs animation */}
-      {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <l-grid size="50" speed="1.5" color="white"></l-grid>
-        </div>
-      ) : (
-        /* Listings Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredListings.length === 0 ? (
-            <div className="col-span-full text-center text-textSecondary py-8">
-              No listings found in this category.
-            </div>
-          ) : (
-            filteredListings.map((listing) => {
+  return (
+    <div className="min-h-screen bg-primary">
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-col gap-6">
+          {/* Search */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search listings..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-secondary/50 backdrop-blur-lg rounded-xl px-4 py-2 text-textPrimary placeholder:text-textSecondary focus:outline-none focus:ring-2 focus:ring-accent/50"
+            />
+          </div>
+
+          {/* Categories */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCategory("all")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedCategory === "all"
+                  ? "bg-accent text-white"
+                  : "bg-secondary/50 text-textSecondary hover:text-textPrimary"
+              }`}
+            >
+              All Categories
+            </button>
+            {categories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.name)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedCategory === category.name
+                      ? "bg-accent text-white"
+                      : "bg-secondary/50 text-textSecondary hover:text-textPrimary"
+                  }`}
+                >
+                  <Icon
+                    className={`w-4 h-4 ${
+                      selectedCategory === category.name
+                        ? "text-white"
+                        : category.color
+                    }`}
+                  />
+                  {category.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Listings Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredListings.map((listing) => {
               const category = getCategoryByName(listing.category);
               const Icon = category?.icon;
 
@@ -161,31 +132,31 @@ function Marketplace() {
                     </p>
                   </div>
 
-                  <p className="text-sm text-textSecondary">
+                  <p className="text-sm text-textSecondary line-clamp-2">
                     {listing.description}
                   </p>
 
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-textSecondary">Seller:</span>
-                      <span className="text-textPrimary">
-                        {listing.seller_name}
-                      </span>
-                    </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-textSecondary">
+                      Seller: {listing.seller_name}
+                    </p>
                     <button
-                      onClick={() => handlePurchase(listing)}
-                      className="bg-accent/90 text-white px-4 py-1.5 rounded-lg hover:bg-accent transition-colors text-sm font-medium"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/marketplace/${listing.id}`);
+                      }}
+                      className="bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
                     >
-                      Purchase
+                      View Details
                     </button>
                   </div>
                 </motion.div>
               );
-            })
-          )}
+            })}
+          </div>
         </div>
-      )}
-    </motion.div>
+      </main>
+    </div>
   );
 }
 

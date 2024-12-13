@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import DashboardNavbar from "../components/DashboardNavbar";
 import UserWallet from "./wallet/UserWallet";
+import { purchaseService } from "../services/purchaseService";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -11,8 +12,22 @@ function ProfilePage() {
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get user data from localStorage
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
+
+  useEffect(() => {
+    fetchPurchaseHistory();
+  }, []);
+
+  const fetchPurchaseHistory = async () => {
+    try {
+      const purchases = await purchaseService.getMyPurchases();
+      setPurchaseHistory(purchases);
+    } catch (error) {
+      console.error("Error fetching purchases:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Format join date
   const formatJoinDate = (dateString) => {
@@ -92,16 +107,16 @@ function ProfilePage() {
                   <p className="text-2xl font-bold text-accent">
                     {purchaseHistory.length}
                   </p>
-                  <p className="text-xs text-textSecondary">Total Orders</p>
+                  <p className="text-xs text-textSecondary">Total Purchases</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-accent">
-                    {
-                      purchaseHistory.filter((p) => p.status === "active")
-                        .length
-                    }
+                    ₱
+                    {purchaseHistory
+                      .reduce((sum, p) => sum + parseFloat(p.amount), 0)
+                      .toFixed(2)}
                   </p>
-                  <p className="text-xs text-textSecondary">Active Subs</p>
+                  <p className="text-xs text-textSecondary">Total Spent</p>
                 </div>
               </div>
             </div>
@@ -156,7 +171,11 @@ function ProfilePage() {
           {/* Purchases Tab */}
           {activeTab === "purchases" && (
             <div className="space-y-4">
-              {purchaseHistory.length === 0 ? (
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-textSecondary">Loading purchases...</p>
+                </div>
+              ) : purchaseHistory.length === 0 ? (
                 <EmptyPurchases />
               ) : (
                 purchaseHistory.map((purchase) => (
@@ -167,31 +186,18 @@ function ProfilePage() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="text-sm font-medium text-textPrimary">
-                          {purchase.product}
+                          {purchase.listing_title}
                         </h3>
                         <p className="text-xs text-textSecondary">
                           {new Date(purchase.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          purchase.status === "active"
-                            ? "bg-green-500/10 text-green-500"
-                            : "bg-red-500/10 text-red-500"
-                        }`}
-                      >
-                        {purchase.status}
+                      <span className="text-accent font-medium">
+                        ₱{parseFloat(purchase.amount).toFixed(2)}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-xs text-textSecondary">
-                      <div>
-                        <p>Price: ₱{purchase.price}</p>
-                        <p>Seller: {purchase.seller}</p>
-                      </div>
-                      <div>
-                        <p>Expires in: {purchase.expires_in}</p>
-                        <p>Warranty: {purchase.warranty}</p>
-                      </div>
+                    <div className="text-xs text-textSecondary">
+                      <p>Transaction ID: {purchase.id}</p>
                     </div>
                   </div>
                 ))

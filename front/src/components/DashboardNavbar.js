@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../services/authService";
-import { paymentService } from "../services/paymentService";
+import { walletService } from "../services/walletService";
 import { Link } from "react-router-dom";
 
 function DashboardNavbar() {
@@ -23,11 +23,8 @@ function DashboardNavbar() {
 
   const fetchBalance = async () => {
     try {
-      const payments = await paymentService.getMyPayments();
-      const totalCoins = payments
-        .filter((p) => p.status === "approved")
-        .reduce((sum, p) => sum + p.coins, 0);
-      setBalance(totalCoins);
+      const wallet = await walletService.getBalance();
+      setBalance(wallet.coins);
     } catch (error) {
       console.error("Error fetching balance:", error);
     }

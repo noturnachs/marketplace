@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { paymentService } from "../../services/paymentService";
+import { walletService } from "../../services/walletService";
 import qr100 from "./QRCodes/gcash-100.jpg";
 import qr200 from "./QRCodes/gcash-200.jpg";
 import qr300 from "./QRCodes/gcash-300.jpg";
@@ -18,6 +19,7 @@ function UserWallet() {
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingAmount, setProcessingAmount] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
 
   const qrCodes = {
     100: qr100,
@@ -34,16 +36,18 @@ function UserWallet() {
 
   const fetchWalletData = async () => {
     try {
-      const payments = await paymentService.getMyPayments();
-      const approvedCoins = payments
-        .filter((p) => p.status === "approved")
-        .reduce((sum, p) => sum + p.coins, 0);
+      const [wallet, payments] = await Promise.all([
+        walletService.getBalance(),
+        paymentService.getMyPayments(),
+      ]);
+
+      setWalletBalance(wallet.coins);
       const pendingCoins = payments
         .filter((p) => p.status === "pending")
         .reduce((sum, p) => sum + p.coins, 0);
 
       setWalletData({
-        coins: approvedCoins,
+        coins: wallet.coins,
         pendingCoins: pendingCoins,
       });
       setPaymentHistory(payments);
