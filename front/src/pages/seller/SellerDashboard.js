@@ -23,7 +23,8 @@ function SellerDashboard() {
   });
   const [newFeature, setNewFeature] = useState("");
   const [sales, setSales] = useState([]);
-  const [totalSales, setTotalSales] = useState(0);
+  const [totalCompletedSales, setTotalCompletedSales] = useState(0);
+  const [totalPendingSales, setTotalPendingSales] = useState(0);
   const [showSendAccountModal, setShowSendAccountModal] = useState(false);
   const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -49,12 +50,9 @@ function SellerDashboard() {
   const fetchSales = async () => {
     try {
       const salesData = await purchaseService.getMySales();
-      setSales(salesData);
-      const total = salesData.reduce(
-        (sum, sale) => sum + parseFloat(sale.amount),
-        0
-      );
-      setTotalSales(total);
+      setSales(salesData.sales);
+      setTotalCompletedSales(salesData.totalCompletedSales);
+      setTotalPendingSales(salesData.totalPendingSales);
     } catch (error) {
       console.error("Error fetching sales:", error);
     }
@@ -209,11 +207,19 @@ function SellerDashboard() {
           {/* Stats Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-sm text-textSecondary">Total Sales</p>
-              <p className="text-2xl font-semibold text-textPrimary">
-                ₱{totalSales.toFixed(2)}
+              <p className="text-sm text-textSecondary">Completed Sales</p>
+              <p className="text-2xl font-bold text-green-500">
+                ₱{totalCompletedSales}
               </p>
             </div>
+
+            <div className="bg-secondary/30 rounded-lg p-4">
+              <p className="text-sm text-textSecondary">Pending Sales</p>
+              <p className="text-2xl font-bold text-yellow-500">
+                ₱{totalPendingSales}
+              </p>
+            </div>
+
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-sm text-textSecondary">Active Listings</p>
               <p className="text-2xl font-semibold text-textPrimary">
@@ -225,10 +231,6 @@ function SellerDashboard() {
               <p className="text-2xl font-semibold text-textPrimary">
                 {sales.length}
               </p>
-            </div>
-            <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-sm text-textSecondary">Rating</p>
-              <p className="text-2xl font-semibold text-textPrimary">N/A</p>
             </div>
           </div>
 

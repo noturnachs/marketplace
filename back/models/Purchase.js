@@ -6,7 +6,7 @@ class Purchase {
     try {
       await client.query("BEGIN");
 
-      // Get listing details
+      // Get listing details first
       const listingResult = await client.query(
         "SELECT price, seller_id FROM listings WHERE id = $1",
         [listing_id]
@@ -17,39 +17,46 @@ class Purchase {
         throw new Error("Listing not found");
       }
 
-      // Check buyer's wallet balance
+      // Check buyer's balance
       const walletResult = await client.query(
         "SELECT coins FROM wallets WHERE user_id = $1",
         [buyer_id]
       );
       const wallet = walletResult.rows[0];
 
-      if (!wallet || parseFloat(wallet.coins) < parseFloat(listing.price)) {
+      console.log("Debug info:", {
+        walletBalance: wallet?.coins,
+        listingPrice: listing.price,
+        buyerId: buyer_id,
+        listingId: listing_id,
+      });
+
+      if (!wallet) {
+        throw new Error("Wallet not found");
+      }
+
+      // Convert to numbers for comparison
+      const walletBalance = parseFloat(wallet.coins);
+      const listingPrice = parseFloat(listing.price);
+
+      if (walletBalance < listingPrice) {
         throw new Error(
-          `Insufficient coins. Required: ${listing.price}, Available: ${
-            wallet?.coins || 0
-          }`
+          `Insufficient coins. Required: ${listingPrice}, Available: ${walletBalance}`
         );
       }
 
-      // Deduct coins from buyer
+      // Deduct from buyer's wallet
       await client.query(
         "UPDATE wallets SET coins = coins - $1 WHERE user_id = $2",
-        [listing.price, buyer_id]
+        [listingPrice, buyer_id]
       );
 
-      // Add coins to seller
-      await client.query(
-        "UPDATE wallets SET coins = coins + $1 WHERE user_id = $2",
-        [listing.price, listing.seller_id]
-      );
-
-      // Create purchase record
+      // Create purchase record with awaiting_seller status
       const purchaseResult = await client.query(
         `INSERT INTO purchases (buyer_id, listing_id, amount, status)
          VALUES ($1, $2, $3, 'awaiting_seller')
          RETURNING *`,
-        [buyer_id, listing_id, listing.price]
+        [buyer_id, listing_id, listingPrice]
       );
 
       await client.query("COMMIT");
@@ -89,7 +96,15 @@ class Purchase {
         l.title as listing_title,
         l.price,
         u.username as buyer_name,
-        s.username as seller_name
+        s.username as seller_name,
+        CASE 
+          WHEN p.status = 'completed' THEN p.amount
+          ELSE 0
+        END as completed_amount,
+        CASE 
+          WHEN p.status = 'awaiting_seller' THEN p.amount
+          ELSE 0
+        END as pending_amount
       FROM purchases p
       JOIN listings l ON p.listing_id = l.id
       JOIN users u ON p.buyer_id = u.id
@@ -99,7 +114,22 @@ class Purchase {
     `;
 
     const { rows } = await pool.query(query, [sellerId]);
-    return rows;
+
+    // Calculate totals
+    const totalCompletedSales = rows.reduce(
+      (sum, row) => sum + parseFloat(row.completed_amount),
+      0
+    );
+    const totalPendingSales = rows.reduce(
+      (sum, row) => sum + parseFloat(row.pending_amount),
+      0
+    );
+
+    return {
+      sales: rows,
+      totalCompletedSales,
+      totalPendingSales,
+    };
   }
 
   static async updateStatus(id, { status, account_details }) {
@@ -121,18 +151,17 @@ class Purchase {
         throw new Error("Purchase not found");
       }
 
-      // If cancelling, process refund
-      if (status === "cancelled") {
-        // Refund buyer
+      if (status === "completed") {
+        // Add the amount to seller's wallet only when completing the order
+        await client.query(
+          "UPDATE wallets SET coins = coins + $1 WHERE user_id = $2",
+          [purchase.amount, purchase.seller_id]
+        );
+      } else if (status === "cancelled") {
+        // Refund buyer if cancelling
         await client.query(
           "UPDATE wallets SET coins = coins + $1 WHERE user_id = $2",
           [purchase.amount, purchase.buyer_id]
-        );
-
-        // Deduct from seller
-        await client.query(
-          "UPDATE wallets SET coins = coins - $1 WHERE user_id = $2",
-          [purchase.amount, purchase.seller_id]
         );
       }
 
