@@ -16,19 +16,13 @@ const createPaymentsTable = async () => {
   `;
 
   try {
-    const client = await pool.connect();
-    try {
-      await client.query(createTableQuery);
-      console.log("Payments table created successfully");
-    } finally {
-      client.release();
-    }
+    await pool.query(createTableQuery);
+    console.log("Payments table created successfully");
   } catch (error) {
     console.error("Error creating payments table:", error.message);
+    throw error;
   }
 };
-
-createPaymentsTable().catch(console.error);
 
 class Payment {
   static async create(paymentData) {
@@ -83,11 +77,29 @@ class Payment {
     }
   }
 
+  static async getAllPayments() {
+    const query = `
+      SELECT p.*, u.username 
+      FROM payments p
+      JOIN users u ON p.user_id = u.id
+      ORDER BY p.created_at DESC
+    `;
+
+    try {
+      const { rows } = await pool.query(query);
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async getPaymentsByUserId(userId) {
     const query = `
-      SELECT * FROM payments
-      WHERE user_id = $1
-      ORDER BY created_at DESC
+      SELECT p.*, u.username 
+      FROM payments p
+      JOIN users u ON p.user_id = u.id
+      WHERE p.user_id = $1
+      ORDER BY p.created_at DESC
     `;
 
     try {
@@ -98,5 +110,8 @@ class Payment {
     }
   }
 }
+
+// Initialize table
+createPaymentsTable().catch(console.error);
 
 module.exports = Payment;

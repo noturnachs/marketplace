@@ -5,41 +5,38 @@ import { paymentService } from "../../services/paymentService";
 import DashboardNavbar from "../../components/DashboardNavbar";
 
 function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState("pending");
   const [pendingPayments, setPendingPayments] = useState([]);
+  const [allPayments, setAllPayments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
     pendingCount: 0,
     processedToday: 0,
-    volumeToday: 0,
   });
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchPendingPayments();
+    fetchPayments();
   }, []);
 
-  const fetchPendingPayments = async () => {
+  const fetchPayments = async () => {
     try {
-      const payments = await paymentService.getPendingPayments();
-      setPendingPayments(payments);
+      const pending = await paymentService.getPendingPayments();
+      const all = await paymentService.getAllPayments();
+      setPendingPayments(pending);
+      setAllPayments(all);
 
       // Calculate stats
       const today = new Date().toISOString().split("T")[0];
-      const processedToday = payments.filter(
+      const processedToday = all.filter(
         (p) =>
           p.updated_at?.startsWith(today) &&
           (p.status === "approved" || p.status === "rejected")
       ).length;
 
-      const volumeToday = payments
-        .filter(
-          (p) => p.updated_at?.startsWith(today) && p.status === "approved"
-        )
-        .reduce((sum, p) => sum + p.amount, 0);
-
       setStats({
-        pendingCount: payments.filter((p) => p.status === "pending").length,
+        pendingCount: pending.length,
         processedToday,
-        volumeToday,
       });
     } catch (error) {
       setError(error.message);
@@ -49,13 +46,24 @@ function AdminDashboard() {
   const handleStatusUpdate = async (referenceId, newStatus) => {
     try {
       await paymentService.updatePaymentStatus(referenceId, newStatus);
-      await fetchPendingPayments(); // Refresh the list after update
+      await fetchPayments(); // Refresh all data
       alert(`Payment ${newStatus} successfully`);
     } catch (error) {
       console.error("Error updating payment status:", error);
       alert("Failed to update payment status");
     }
   };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  const filteredPayments = allPayments.filter((payment) =>
+    payment.reference_id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const displayPayments =
+    activeTab === "pending" ? pendingPayments : filteredPayments;
 
   return (
     <div className="min-h-screen bg-primary">
@@ -67,14 +75,14 @@ function AdminDashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
+          {/* Header and Stats */}
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-semibold text-textPrimary">
               Admin Dashboard
             </h1>
           </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
               <h3 className="text-sm text-textSecondary mb-2">
                 Pending Payments
@@ -85,49 +93,74 @@ function AdminDashboard() {
             </div>
             <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
               <h3 className="text-sm text-textSecondary mb-2">
-                Total Processed Today
+                Processed Today
               </h3>
               <p className="text-2xl font-bold text-accent">
                 {stats.processedToday}
               </p>
             </div>
-            <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
-              <h3 className="text-sm text-textSecondary mb-2">
-                Total Volume Today
-              </h3>
-              <p className="text-2xl font-bold text-accent">
-                ₱{stats.volumeToday}
-              </p>
-            </div>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-              <p className="text-red-500">{error}</p>
-            </div>
-          )}
-
-          {/* Payments Table */}
+          {/* Tabs and Search */}
           <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
-            <h2 className="text-lg font-semibold text-textPrimary mb-4">
-              Payment Requests
-            </h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setActiveTab("pending")}
+                  className={`text-sm font-medium ${
+                    activeTab === "pending"
+                      ? "text-accent"
+                      : "text-textSecondary hover:text-textPrimary"
+                  }`}
+                >
+                  Pending Requests
+                </button>
+                <button
+                  onClick={() => setActiveTab("all")}
+                  className={`text-sm font-medium ${
+                    activeTab === "all"
+                      ? "text-accent"
+                      : "text-textSecondary hover:text-textPrimary"
+                  }`}
+                >
+                  All Payments
+                </button>
+              </div>
+              {activeTab === "all" && (
+                <div className="w-full sm:w-auto">
+                  <input
+                    type="text"
+                    placeholder="Search by reference ID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full px-4 py-2 bg-secondary/30 rounded-lg text-sm text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Payments Table */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-sm text-textSecondary">
+                    <th className="pb-4">Date</th>
                     <th className="pb-4">User</th>
                     <th className="pb-4">Amount</th>
                     <th className="pb-4">Method</th>
                     <th className="pb-4">Reference</th>
                     <th className="pb-4">Status</th>
-                    <th className="pb-4">Actions</th>
+                    {activeTab === "pending" && (
+                      <th className="pb-4">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {pendingPayments.map((payment) => (
+                  {displayPayments.map((payment) => (
                     <tr key={payment.id} className="border-t border-white/5">
+                      <td className="py-4 text-textPrimary">
+                        {formatDate(payment.created_at)}
+                      </td>
                       <td className="py-4">
                         <div>
                           <p className="text-textPrimary">{payment.username}</p>
@@ -163,32 +196,34 @@ function AdminDashboard() {
                           {payment.status}
                         </span>
                       </td>
-                      <td className="py-4">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() =>
-                              handleStatusUpdate(
-                                payment.reference_id,
-                                "approved"
-                              )
-                            }
-                            className="px-3 py-1 bg-green-500/10 text-green-500 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleStatusUpdate(
-                                payment.reference_id,
-                                "rejected"
-                              )
-                            }
-                            className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs hover:bg-red-500/20 transition-colors"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </td>
+                      {activeTab === "pending" && (
+                        <td className="py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(
+                                  payment.reference_id,
+                                  "approved"
+                                )
+                              }
+                              className="px-3 py-1 bg-green-500/10 text-green-500 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(
+                                  payment.reference_id,
+                                  "rejected"
+                                )
+                              }
+                              className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs hover:bg-red-500/20 transition-colors"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

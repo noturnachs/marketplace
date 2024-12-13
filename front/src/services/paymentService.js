@@ -8,7 +8,12 @@ export const paymentService = {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(paymentData),
+      body: JSON.stringify({
+        amount: paymentData.amount,
+        coins: paymentData.coins,
+        referenceId: paymentData.referenceId,
+        paymentMethod: paymentData.paymentMethod,
+      }),
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -26,6 +31,15 @@ export const paymentService = {
 
   async getPendingPayments() {
     const response = await fetch(`${API_URL}/pending`, {
+      credentials: "include",
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
+
+  async getAllPayments() {
+    const response = await fetch(`${API_URL}/all`, {
       credentials: "include",
     });
     const data = await response.json();

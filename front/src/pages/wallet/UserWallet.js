@@ -14,7 +14,10 @@ function UserWallet() {
   const [showQR, setShowQR] = useState(false);
   const [paymentReference, setPaymentReference] = useState("");
   const [walletData, setWalletData] = useState({ coins: 0, pendingCoins: 0 });
+  const [paymentHistory, setPaymentHistory] = useState([]);
   const [error, setError] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingAmount, setProcessingAmount] = useState(null);
 
   const qrCodes = {
     100: qr100,
@@ -43,13 +46,36 @@ function UserWallet() {
         coins: approvedCoins,
         pendingCoins: pendingCoins,
       });
+      setPaymentHistory(payments);
     } catch (error) {
       setError(error.message);
     }
   };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-500/10 text-yellow-500";
+      case "approved":
+        return "bg-green-500/10 text-green-500";
+      case "rejected":
+        return "bg-red-500/10 text-red-500";
+      default:
+        return "bg-gray-500/10 text-gray-500";
+    }
+  };
+
   const handleCashIn = async (option) => {
+    if (isProcessing) return; // Prevent multiple clicks while processing
+
     try {
+      setIsProcessing(true);
+      setProcessingAmount(option.amount);
+
       const referenceId = `GC${Math.random()
         .toString(36)
         .substr(2, 9)
@@ -65,9 +91,12 @@ function UserWallet() {
 
       setSelectedAmount(option);
       setShowQR(true);
-      fetchWalletData(); // Refresh wallet data
+      await fetchWalletData(); // Refresh wallet data
     } catch (error) {
       setError(error.message);
+    } finally {
+      setIsProcessing(false);
+      setProcessingAmount(null);
     }
   };
 
@@ -86,62 +115,143 @@ function UserWallet() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 mb-6"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h2 className="text-lg font-semibold text-textPrimary">My Wallet</h2>
-          <p className="text-sm text-textSecondary">Available balance</p>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-accent">
-            {walletData.coins} <span className="text-sm">coins</span>
-          </p>
-          {walletData.pendingCoins > 0 && (
-            <p className="text-xs text-textSecondary">
-              {walletData.pendingCoins} coins pending
-            </p>
-          )}
-        </div>
-      </div>
-
-      <button
-        onClick={() => setShowCashIn(!showCashIn)}
-        className="w-full bg-accent text-white py-2 rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 mb-6"
       >
-        Cash In
-      </button>
-
-      {showCashIn && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          className="mt-4 space-y-4"
-        >
-          <div className="grid grid-cols-2 gap-4">
-            {cashInOptions.map((option) => (
-              <button
-                key={option.amount}
-                onClick={() => handleCashIn(option)}
-                className="p-4 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors text-left"
-              >
-                <p className="text-sm font-medium text-textPrimary">
-                  {option.coins} coins
-                </p>
-                <p className="text-xs text-textSecondary">{option.price}</p>
-              </button>
-            ))}
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-textPrimary">
+              My Wallet
+            </h2>
+            <p className="text-sm text-textSecondary">Available balance</p>
           </div>
-          <p className="text-xs text-textSecondary text-center">
-            1 coin = ₱1 • GCash payments only
-          </p>
-        </motion.div>
-      )}
+          <div className="text-right">
+            <p className="text-2xl font-bold text-accent">
+              {walletData.coins} <span className="text-sm">coins</span>
+            </p>
+            {walletData.pendingCoins > 0 && (
+              <p className="text-xs text-textSecondary">
+                {walletData.pendingCoins} coins pending
+              </p>
+            )}
+          </div>
+        </div>
 
-      {/* QR Code Modal */}
+        <button
+          onClick={() => setShowCashIn(!showCashIn)}
+          className="w-full bg-accent text-white py-2 rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
+        >
+          Cash In
+        </button>
+
+        {showCashIn && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="mt-4 space-y-4"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              {cashInOptions.map((option) => (
+                <button
+                  key={option.amount}
+                  onClick={() => handleCashIn(option)}
+                  disabled={isProcessing}
+                  className={`p-4 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors text-left relative ${
+                    isProcessing && processingAmount === option.amount
+                      ? "cursor-not-allowed opacity-75"
+                      : "hover:bg-secondary/50"
+                  }`}
+                >
+                  {isProcessing && processingAmount === option.amount ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/30 rounded-lg">
+                      <svg
+                        className="animate-spin h-5 w-5 text-accent"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    </div>
+                  ) : null}
+                  <p className="text-sm font-medium text-textPrimary">
+                    {option.coins} coins
+                  </p>
+                  <p className="text-xs text-textSecondary">{option.price}</p>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-textSecondary text-center">
+              1 coin = ₱1 • GCash payments only
+            </p>
+          </motion.div>
+        )}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6"
+      >
+        <h2 className="text-lg font-semibold text-textPrimary mb-4">
+          Top-up History
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="text-left text-sm text-textSecondary">
+                <th className="pb-4">Date</th>
+                <th className="pb-4">Amount</th>
+                <th className="pb-4">Coins</th>
+                <th className="pb-4">Reference</th>
+                <th className="pb-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentHistory.map((payment) => (
+                <tr
+                  key={payment.id}
+                  className="border-t border-white/5 text-sm"
+                >
+                  <td className="py-4 text-textPrimary">
+                    {formatDate(payment.created_at)}
+                  </td>
+                  <td className="py-4 text-textPrimary">₱{payment.amount}</td>
+                  <td className="py-4 text-textPrimary">{payment.coins}</td>
+                  <td className="py-4 text-textSecondary">
+                    {payment.reference_id}
+                  </td>
+                  <td className="py-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
+                        payment.status
+                      )}`}
+                    >
+                      {payment.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+
       {showQR && selectedAmount && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -216,7 +326,7 @@ function UserWallet() {
           </motion.div>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   );
 }
 
