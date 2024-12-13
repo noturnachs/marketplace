@@ -263,9 +263,8 @@ function ProfilePage() {
                             </p>
                             <div className="bg-secondary/50 rounded-lg p-3 mt-2">
                               <p className="text-xs text-textSecondary">
-                                Note: If seller fails to send the account within
-                                1 hour, your funds will be automatically
-                                refunded.
+                                ⏰ If seller fails to send the account within 1
+                                hour, your funds will be automatically refunded.
                               </p>
                               <p className="text-xs text-textSecondary mt-1">
                                 Ordered at: {formatPhTime(purchase.created_at)}
@@ -324,9 +323,14 @@ function ProfilePage() {
                       ) : (
                         <>
                           <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                          <p className="text-sm text-red-500">
-                            Order cancelled
-                          </p>
+                          <div>
+                            <p className="text-sm text-red-500">
+                              Order cancelled
+                            </p>
+                            <p className="text-xs text-green-500 mt-1">
+                              ✓ Amount has already been refunded to your account
+                            </p>
+                          </div>
                         </>
                       )}
                     </div>
