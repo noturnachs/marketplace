@@ -262,33 +262,61 @@ function SellerDashboard() {
                       </p>
                     </div>
 
-                    {sale.status === "awaiting_seller" && (
-                      <div className="border-t border-white/10 pt-3 mt-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                          <p className="text-sm text-yellow-500 font-medium">
-                            Action Required
+                    {/* Status and Actions Section */}
+                    <div className="border-t border-white/10 pt-3 mt-3">
+                      {sale.status === "awaiting_seller" ? (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                            <p className="text-sm text-yellow-500 font-medium">
+                              Action Required
+                            </p>
+                          </div>
+                          <p className="text-sm text-textSecondary mb-3">
+                            Please send the account details to complete this
+                            order
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSendAccount(sale.id)}
+                              className="px-3 py-1.5 bg-accent text-white text-sm rounded-lg hover:bg-accent/90 transition-colors"
+                            >
+                              Send Account Details
+                            </button>
+                            <button
+                              onClick={() => handleCancelOrder(sale.id)}
+                              className="px-3 py-1.5 bg-secondary/50 text-textSecondary text-sm rounded-lg hover:text-textPrimary transition-colors"
+                            >
+                              Cancel Order
+                            </button>
+                          </div>
+                        </>
+                      ) : sale.status === "completed" ? (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <p className="text-sm text-green-500 font-medium">
+                              Completed
+                            </p>
+                          </div>
+                          <div className="text-sm">
+                            <p className="text-textSecondary mb-1">
+                              Sent Account Details:
+                            </p>
+                            <p className="text-textPrimary bg-secondary/30 p-2 rounded-lg font-mono whitespace-pre-wrap">
+                              {sale.account_details}
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <p className="text-sm text-red-500">
+                            Order Cancelled
                           </p>
                         </div>
-                        <p className="text-sm text-textSecondary mb-3">
-                          Please send the account details to complete this order
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleSendAccount(sale.id)}
-                            className="px-3 py-1.5 bg-accent text-white text-sm rounded-lg hover:bg-accent/90 transition-colors"
-                          >
-                            Send Account Details
-                          </button>
-                          <button
-                            onClick={() => handleCancelOrder(sale.id)}
-                            className="px-3 py-1.5 bg-secondary/50 text-textSecondary text-sm rounded-lg hover:text-textPrimary transition-colors"
-                          >
-                            Cancel Order
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 ))
               )}
