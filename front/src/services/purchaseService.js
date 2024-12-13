@@ -1,7 +1,7 @@
 const API_URL = `${process.env.REACT_APP_API_URL}/v1/purchases`;
 
 export const purchaseService = {
-  async create(listingId) {
+  async create(listingId, amount) {
     const token = localStorage.getItem("token");
     const response = await fetch(API_URL, {
       method: "POST",
@@ -9,7 +9,11 @@ export const purchaseService = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ listing_id: listingId }),
+      body: JSON.stringify({
+        listing_id: listingId,
+        amount: amount,
+        created_at: new Date().toISOString(),
+      }),
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);

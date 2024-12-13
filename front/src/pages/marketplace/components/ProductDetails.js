@@ -45,21 +45,16 @@ function ProductDetails() {
     }
   };
 
-  const handlePurchase = async () => {
+  const handleConfirmPurchase = async () => {
     try {
       setIsPurchasing(true);
-      await purchaseService.create(id);
-      await fetchWalletBalance(); // Refresh balance
-      setShowConfirmModal(false);
-      setShowSuccessModal(true);
+      await purchaseService.create(listing.id, listing.price);
+      navigate("/profile?tab=purchases");
     } catch (error) {
-      if (error.message.includes("insufficient")) {
-        alert("Insufficient coins! Please add funds to your wallet.");
-      } else {
-        alert(error.message);
-      }
+      setError(error.message);
     } finally {
       setIsPurchasing(false);
+      setShowConfirmModal(false);
     }
   };
 
@@ -196,7 +191,7 @@ function ProductDetails() {
         onClose={() => setShowConfirmModal(false)}
         listing={listing}
         currentBalance={walletBalance}
-        onConfirm={handlePurchase}
+        onConfirm={handleConfirmPurchase}
         isPurchasing={isPurchasing}
       />
 
@@ -204,7 +199,7 @@ function ProductDetails() {
         isOpen={showSuccessModal}
         onClose={() => {
           setShowSuccessModal(false);
-          navigate("/dashboard");
+          navigate("/profile");
         }}
         listing={listing}
       />

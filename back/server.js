@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
+require("./cron/purchaseExpiryCheck");
 
 // Load env vars
 dotenv.config();

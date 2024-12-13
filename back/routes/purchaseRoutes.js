@@ -6,8 +6,10 @@ const { protect } = require("../middleware/auth");
 router.post("/", protect, async (req, res) => {
   try {
     const purchase = await Purchase.create({
-      buyer_id: req.user.id,
-      listing_id: req.body.listing_id,
+      buyerId: req.user.id,
+      listingId: req.body.listing_id,
+      amount: req.body.amount,
+      created_at: req.body.created_at,
     });
 
     res.json({

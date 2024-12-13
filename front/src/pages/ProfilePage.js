@@ -12,12 +12,54 @@ function ProfilePage() {
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [countdowns, setCountdowns] = useState({});
 
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
 
   useEffect(() => {
     fetchPurchaseHistory();
   }, []);
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const phTime = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+    const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    const seconds = Math.floor((now - phTime) / 1000);
+    const minutes = Math.floor(seconds / 60);
+
+    if (minutes < 1) {
+      return "just now";
+    } else if (minutes === 1) {
+      return "1 minute ago";
+    } else if (minutes < 60) {
+      return `${minutes} minutes ago`;
+    } else {
+      return (
+        phTime.toLocaleString("en-US", {
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+          timeZone: "Asia/Manila",
+        }) + " PHT"
+      );
+    }
+  };
+
+  const formatPhTime = (dateString) => {
+    const date = new Date(dateString);
+    const phDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+
+    return (
+      phDate.toLocaleString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      }) + " PHT"
+    );
+  };
 
   const fetchPurchaseHistory = async () => {
     try {
@@ -214,10 +256,22 @@ function ProfilePage() {
                       {purchase.status === "awaiting_seller" ? (
                         <>
                           <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                          <p className="text-sm text-yellow-500">
-                            Waiting for {purchase.seller_name} to send the
-                            account
-                          </p>
+                          <div className="flex-1">
+                            <p className="text-sm text-yellow-500">
+                              Waiting for {purchase.seller_name} to send the
+                              account
+                            </p>
+                            <div className="bg-secondary/50 rounded-lg p-3 mt-2">
+                              <p className="text-xs text-textSecondary">
+                                Note: If seller fails to send the account within
+                                1 hour, your funds will be automatically
+                                refunded.
+                              </p>
+                              <p className="text-xs text-textSecondary mt-1">
+                                Ordered at: {formatPhTime(purchase.created_at)}
+                              </p>
+                            </div>
+                          </div>
                         </>
                       ) : purchase.status === "completed" ? (
                         <>
@@ -238,6 +292,13 @@ function ProfilePage() {
                                 <p className="text-sm text-yellow-500 mb-2">
                                   Please confirm if you received a valid account
                                 </p>
+                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-3">
+                                  <p className="text-sm text-yellow-500">
+                                    ⚠️ Important: Failure to confirm receipt
+                                    within 24 hours will void the warranty and
+                                    support for this purchase.
+                                  </p>
+                                </div>
                                 <button
                                   onClick={() =>
                                     handleConfirmPurchase(purchase.id)
