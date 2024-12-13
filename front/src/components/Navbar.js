@@ -34,7 +34,6 @@ function Navbar() {
   const handleLogout = async () => {
     try {
       await authService.logout();
-      await new Promise((resolve) => setTimeout(resolve, 100));
       window.location.replace("/login");
     } catch (error) {
       console.error("Logout failed:", error);

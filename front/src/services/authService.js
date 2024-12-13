@@ -7,7 +7,6 @@ export const authService = {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include",
       body: JSON.stringify({ username, password }),
     });
 
@@ -16,30 +15,10 @@ export const authService = {
       throw new Error(data.message || "Login failed");
     }
 
+    // Store the token in localStorage
     if (data.token) {
       localStorage.setItem("token", data.token);
-    }
-
-    return data;
-  },
-
-  async register(userData) {
-    const response = await fetch(`${API_URL}/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(userData),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Registration failed");
-    }
-
-    if (data.token) {
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("userData", JSON.stringify(data.user));
     }
 
     return data;
@@ -47,20 +26,17 @@ export const authService = {
 
   async logout() {
     try {
+      const token = localStorage.getItem("token");
       await fetch(`${API_URL}/logout`, {
         method: "GET",
-        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
       localStorage.clear();
-      document.cookie =
-        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      if (process.env.NODE_ENV === "production") {
-        document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.onrender.com; secure; samesite=none;";
-      }
     }
     return true;
   },
@@ -68,13 +44,16 @@ export const authService = {
   async checkAuth() {
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
       const response = await fetch(`${API_URL}/me`, {
         method: "GET",
-        credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -85,9 +64,7 @@ export const authService = {
       const data = await response.json();
       return data.data;
     } catch (error) {
-      localStorage.removeItem("userData");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("token");
+      localStorage.clear();
       throw error;
     }
   },

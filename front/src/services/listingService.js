@@ -2,8 +2,11 @@ const API_URL = `${process.env.REACT_APP_API_URL}/v1/listings`;
 
 export const listingService = {
   async getAll() {
+    const token = localStorage.getItem("token");
     const response = await fetch(API_URL, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -11,8 +14,11 @@ export const listingService = {
   },
 
   async getById(id) {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/${id}`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -20,8 +26,11 @@ export const listingService = {
   },
 
   async getMyListings() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/my-listings`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -29,12 +38,13 @@ export const listingService = {
   },
 
   async create(listing) {
+    const token = localStorage.getItem("token");
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify(listing),
     });
     const data = await response.json();
@@ -43,12 +53,13 @@ export const listingService = {
   },
 
   async update(id, listing) {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify(listing),
     });
     const data = await response.json();
@@ -57,9 +68,12 @@ export const listingService = {
   },
 
   async delete(id) {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/${id}`, {
       method: "DELETE",
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);

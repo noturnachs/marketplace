@@ -2,8 +2,11 @@ const API_URL = `${process.env.REACT_APP_API_URL}/v1`;
 
 export const sellerService = {
   async getPendingSellers() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/sellers/pending`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -11,8 +14,11 @@ export const sellerService = {
   },
 
   async getAllSellers() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/sellers`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -20,12 +26,13 @@ export const sellerService = {
   },
 
   async updateStatus(sellerId, status) {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/sellers/${sellerId}/status`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify({ status }),
     });
     const data = await response.json();

@@ -2,12 +2,13 @@ const API_URL = `${process.env.REACT_APP_API_URL}/v1/payments`;
 
 export const paymentService = {
   async createPayment(paymentData) {
+    const token = localStorage.getItem("token");
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify({
         amount: paymentData.amount,
         coins: paymentData.coins,
@@ -21,8 +22,11 @@ export const paymentService = {
   },
 
   async getMyPayments() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/my-payments`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -30,8 +34,11 @@ export const paymentService = {
   },
 
   async getPendingPayments() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/pending`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -39,8 +46,11 @@ export const paymentService = {
   },
 
   async getAllPayments() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/all`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -48,12 +58,13 @@ export const paymentService = {
   },
 
   async updatePaymentStatus(referenceId, status) {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/${referenceId}/status`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify({ status }),
     });
     const data = await response.json();

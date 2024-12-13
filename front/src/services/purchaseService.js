@@ -2,12 +2,13 @@ const API_URL = `${process.env.REACT_APP_API_URL}/v1/purchases`;
 
 export const purchaseService = {
   async create(listingId) {
+    const token = localStorage.getItem("token");
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify({ listing_id: listingId }),
     });
     const data = await response.json();
@@ -16,8 +17,11 @@ export const purchaseService = {
   },
 
   async getMyPurchases() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/my-purchases`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -25,8 +29,11 @@ export const purchaseService = {
   },
 
   async getMySales() {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/my-sales`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error);
@@ -34,12 +41,13 @@ export const purchaseService = {
   },
 
   async updateStatus(purchaseId, data) {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/${purchaseId}/status`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify(data),
     });
 
