@@ -266,9 +266,9 @@ function ProfilePage() {
                                 ⏰ If seller fails to send the account within 1
                                 hour, your funds will be automatically refunded.
                               </p>
-                              <p className="text-xs text-textSecondary mt-1">
+                              {/* <p className="text-xs text-textSecondary mt-1">
                                 Ordered at: {formatPhTime(purchase.created_at)}
-                              </p>
+                              </p> */}
                             </div>
                           </div>
                         </>
