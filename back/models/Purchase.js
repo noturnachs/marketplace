@@ -235,38 +235,71 @@ class Purchase {
     try {
       await client.query("BEGIN");
 
-      // Set timezone to Asia/Manila
-      await client.query("SET timezone = 'Asia/Manila'");
+      console.log("Starting expired purchases check...");
 
       // Find purchases that are over 1 hour old and still awaiting seller
       const expiredPurchases = await client.query(`
-        SELECT p.*, l.seller_id, l.price as amount
+        SELECT 
+          p.*,
+          l.seller_id,
+          l.price as amount,
+          (p.created_at + INTERVAL '8 hours') as ph_created_at,
+          (NOW() + INTERVAL '8 hours') as ph_current_time
         FROM purchases p
         JOIN listings l ON p.listing_id = l.id
         WHERE p.status = 'awaiting_seller'
-        AND p.created_at < (NOW() AT TIME ZONE 'Asia/Manila') - INTERVAL '1 hour'
+        AND (p.created_at + INTERVAL '8 hours') < ((NOW() + INTERVAL '8 hours') - INTERVAL '1 hour')
       `);
 
+      console.log(`Found ${expiredPurchases.rows.length} expired purchases`);
+
       for (const purchase of expiredPurchases.rows) {
+        console.log("Time Debug:", {
+          purchase_id: purchase.id,
+          utc_created_at: purchase.created_at,
+          ph_created_at: purchase.ph_created_at,
+          ph_current_time: purchase.ph_current_time,
+          time_difference_minutes: Math.floor(
+            (new Date(purchase.ph_current_time) -
+              new Date(purchase.ph_created_at)) /
+              (1000 * 60)
+          ),
+        });
+
+        // Rest of the processing...
+        console.log(`Processing expired purchase ID: ${purchase.id}`);
+        console.log(`Created at (UTC): ${purchase.created_at}`);
+        console.log(`Created at (PH): ${purchase.ph_created_at}`);
+        console.log(`Current time (PH): ${purchase.ph_current_time}`);
+        console.log(
+          `Amount to refund: ${purchase.amount} to buyer ID: ${purchase.buyer_id}`
+        );
+
         // Refund the buyer
         await client.query(
           "UPDATE wallets SET coins = coins + $1 WHERE user_id = $2",
           [purchase.amount, purchase.buyer_id]
         );
+        console.log(
+          `Refunded ${purchase.amount} coins to buyer ${purchase.buyer_id}`
+        );
 
-        // Update purchase status to cancelled without cancelled_reason
+        // Update purchase status to cancelled
         await client.query(
           `UPDATE purchases 
            SET status = 'cancelled'
            WHERE id = $1`,
           [purchase.id]
         );
+        console.log(`Updated purchase ${purchase.id} status to cancelled`);
       }
 
       await client.query("COMMIT");
+      console.log("Expired purchases check completed successfully");
       return expiredPurchases.rows;
     } catch (error) {
       await client.query("ROLLBACK");
+      console.error("Error in handleExpiredPurchases:", error);
       throw error;
     } finally {
       client.release();
