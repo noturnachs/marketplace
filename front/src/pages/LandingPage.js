@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 
 function LandingPage() {
+  const navigate = useNavigate();
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     whileInView: { opacity: 1, y: 0 },
@@ -38,6 +41,7 @@ function LandingPage() {
             for all your digital asset transactions.
           </p>
           <motion.button
+            onClick={() => navigate("/login")}
             className="bg-accent/90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-accent transition-all hover:scale-105 transform"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
