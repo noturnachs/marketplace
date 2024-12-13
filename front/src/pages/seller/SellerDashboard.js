@@ -204,10 +204,10 @@ function SellerDashboard() {
 
       {sellerStatus === "verified" && (
         <>
-          {/* Stats Section */}
+          {/* Stats Section - Updated to consider confirmation status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-sm text-textSecondary">Completed Sales</p>
+              <p className="text-sm text-textSecondary">Confirmed Sales</p>
               <p className="text-2xl font-bold text-green-500">
                 ₱{totalCompletedSales}
               </p>
@@ -234,7 +234,7 @@ function SellerDashboard() {
             </div>
           </div>
 
-          {/* Sales History */}
+          {/* Sales History - Updated to show confirmation status */}
           <div className="bg-secondary/30 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-textPrimary mb-4">
               Recent Sales
@@ -265,7 +265,7 @@ function SellerDashboard() {
                       </p>
                     </div>
 
-                    {/* Status and Actions Section */}
+                    {/* Status and Actions Section - Updated to show confirmation status */}
                     <div className="border-t border-white/10 pt-3 mt-3">
                       {sale.status === "awaiting_seller" ? (
                         <>
@@ -299,7 +299,9 @@ function SellerDashboard() {
                           <div className="flex items-center gap-2 mb-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                             <p className="text-sm text-green-500 font-medium">
-                              Completed
+                              {sale.is_confirmed
+                                ? "Completed & Confirmed"
+                                : "Completed (Awaiting Buyer Confirmation)"}
                             </p>
                           </div>
                           <div className="text-sm">
@@ -309,6 +311,11 @@ function SellerDashboard() {
                             <p className="text-textPrimary bg-secondary/30 p-2 rounded-lg font-mono whitespace-pre-wrap">
                               {sale.account_details}
                             </p>
+                            {!sale.is_confirmed && (
+                              <p className="text-yellow-500 text-sm mt-2">
+                                Waiting for buyer to confirm the account details
+                              </p>
+                            )}
                           </div>
                         </>
                       ) : (

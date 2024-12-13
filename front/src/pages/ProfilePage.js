@@ -11,6 +11,7 @@ function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
 
@@ -80,6 +81,18 @@ function ProfilePage() {
       </div>
     </div>
   );
+
+  const handleConfirmPurchase = async (purchaseId) => {
+    try {
+      setIsLoading(true);
+      await purchaseService.confirmPurchase(purchaseId);
+      fetchPurchaseHistory(); // Refresh the purchases list
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-primary">
@@ -210,12 +223,41 @@ function ProfilePage() {
                         <>
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                           <div className="text-sm">
-                            <p className="text-green-500 font-medium mb-1">
-                              Account Details:
-                            </p>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-green-500 font-medium">
+                                {purchase.is_confirmed
+                                  ? "Account Confirmed"
+                                  : "Account Received - Pending Confirmation"}
+                              </p>
+                            </div>
                             <p className="text-textPrimary bg-secondary/50 p-2 rounded-lg font-mono whitespace-pre-wrap">
                               {purchase.account_details}
                             </p>
+                            {!purchase.is_confirmed ? (
+                              <div className="mt-3 border-t border-white/10 pt-3">
+                                <p className="text-sm text-yellow-500 mb-2">
+                                  Please confirm if you received a valid account
+                                </p>
+                                <button
+                                  onClick={() =>
+                                    handleConfirmPurchase(purchase.id)
+                                  }
+                                  disabled={isLoading}
+                                  className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {isLoading
+                                    ? "Confirming..."
+                                    : "Confirm Account Receipt"}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="mt-3 border-t border-white/10 pt-3">
+                                <p className="text-sm text-green-500">
+                                  ✓ You already confirmed that you have received
+                                  the product.
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </>
                       ) : (

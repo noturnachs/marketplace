@@ -74,4 +74,21 @@ router.put("/:id/status", protect, async (req, res) => {
   }
 });
 
+router.post("/:id/confirm", protect, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const purchase = await Purchase.confirmPurchase(id);
+
+    res.json({
+      success: true,
+      data: purchase,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
