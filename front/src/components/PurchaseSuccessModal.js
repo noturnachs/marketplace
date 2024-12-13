@@ -29,14 +29,31 @@ function PurchaseSuccessModal({ isOpen, onClose, listing }) {
           <h2 className="text-xl font-semibold text-textPrimary mb-2">
             Purchase Successful!
           </h2>
-          <p className="text-textSecondary mb-6">
-            You have successfully purchased {listing.title}
-          </p>
+          <div className="space-y-4">
+            <p className="text-textSecondary">
+              You have successfully purchased {listing.title}
+            </p>
+
+            <div className="bg-secondary/50 rounded-lg p-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                <p className="text-yellow-500 font-medium">Awaiting Seller</p>
+              </div>
+              <p className="text-sm text-textSecondary">
+                Waiting for {listing.seller_name} to send the account details
+              </p>
+            </div>
+
+            <p className="text-xs text-textSecondary">
+              You'll be notified when the seller processes your order
+            </p>
+          </div>
+
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
+            className="mt-6 px-6 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
           >
-            Continue Shopping
+            View My Purchases
           </button>
         </motion.div>
       </div>

@@ -196,7 +196,13 @@ function ProfilePage() {
                         ₱{parseFloat(purchase.amount).toFixed(2)}
                       </span>
                     </div>
-                    <div className="text-xs text-textSecondary">
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <p className="text-sm text-yellow-500">
+                        Waiting for {purchase.seller_name} to send the account
+                      </p>
+                    </div>
+                    <div className="text-xs text-textSecondary mt-2">
                       <p>Transaction ID: {purchase.id}</p>
                     </div>
                   </div>
