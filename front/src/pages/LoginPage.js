@@ -29,7 +29,7 @@ function LoginPage() {
       if (userData.role === "admin") {
         navigate("/admin");
       } else if (userData.role === "seller") {
-        navigate("/seller");
+        navigate("/dashboard");
       } else {
         navigate("/dashboard");
       }

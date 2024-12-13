@@ -6,7 +6,16 @@ export const listingService = {
       credentials: "include",
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message);
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
+
+  async getById(id) {
+    const response = await fetch(`${API_URL}/${id}`, {
+      credentials: "include",
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
     return data.data;
   },
 
@@ -15,35 +24,35 @@ export const listingService = {
       credentials: "include",
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message);
+    if (!response.ok) throw new Error(data.error);
     return data.data;
   },
 
-  async create(listingData) {
+  async create(listing) {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(listingData),
+      body: JSON.stringify(listing),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message);
+    if (!response.ok) throw new Error(data.error);
     return data.data;
   },
 
-  async update(id, listingData) {
+  async update(id, listing) {
     const response = await fetch(`${API_URL}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(listingData),
+      body: JSON.stringify(listing),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message);
+    if (!response.ok) throw new Error(data.error);
     return data.data;
   },
 
@@ -53,7 +62,7 @@ export const listingService = {
       credentials: "include",
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message);
+    if (!response.ok) throw new Error(data.error);
     return data.data;
   },
 };

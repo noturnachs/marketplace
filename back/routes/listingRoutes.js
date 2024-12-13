@@ -25,33 +25,33 @@ router.post("/", protect, restrictTo("seller"), async (req, res) => {
 });
 
 // Get all listings (for marketplace)
-router.get("/", async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
     const listings = await Listing.getAll();
     res.json({
-      status: "success",
+      success: true,
       data: listings,
     });
   } catch (error) {
     res.status(500).json({
-      status: "error",
-      message: error.message,
+      success: false,
+      error: error.message,
     });
   }
 });
 
 // Get seller's listings
-router.get("/my-listings", protect, restrictTo("seller"), async (req, res) => {
+router.get("/my-listings", protect, async (req, res) => {
   try {
-    const listings = await Listing.getBySellerId(req.user.id);
+    const listings = await Listing.getByUserId(req.user.id);
     res.json({
-      status: "success",
+      success: true,
       data: listings,
     });
   } catch (error) {
     res.status(500).json({
-      status: "error",
-      message: error.message,
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -100,6 +100,28 @@ router.delete("/:id", protect, restrictTo("seller"), async (req, res) => {
     res.status(400).json({
       status: "error",
       message: error.message,
+    });
+  }
+});
+
+// Get single listing by ID
+router.get("/:id", protect, async (req, res) => {
+  try {
+    const listing = await Listing.getById(req.params.id);
+    if (!listing) {
+      return res.status(404).json({
+        success: false,
+        error: "Listing not found",
+      });
+    }
+    res.json({
+      success: true,
+      data: listing,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });

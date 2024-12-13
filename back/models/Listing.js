@@ -28,31 +28,41 @@ const createListingsTable = async () => {
 
 class Listing {
   static async create(listingData) {
-    const { seller_id, title, description, price, category, duration } =
-      listingData;
+    const {
+      seller_id,
+      title,
+      description,
+      price,
+      category,
+      duration,
+      features,
+    } = listingData;
 
     const query = `
-      INSERT INTO listings (seller_id, title, description, price, category, duration)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO listings (seller_id, title, description, price, category, duration, features)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
 
-    const values = [seller_id, title, description, price, category, duration];
+    const values = [
+      seller_id,
+      title,
+      description,
+      price,
+      category,
+      duration,
+      features || [],
+    ];
 
     const { rows } = await pool.query(query, values);
     return rows[0];
   }
 
   static async getAll() {
-    const query = `
-      SELECT l.*, u.username as seller_name 
-      FROM listings l
-      JOIN users u ON l.seller_id = u.id
-      ORDER BY l.created_at DESC
-    `;
-
-    const { rows } = await pool.query(query);
-    return rows;
+    const result = await pool.query(
+      "SELECT listings.*, users.username as seller_name FROM listings JOIN users ON listings.seller_id = users.id"
+    );
+    return result.rows;
   }
 
   static async getBySellerId(sellerId) {
@@ -67,46 +77,33 @@ class Listing {
   }
 
   static async getById(id) {
-    const query = `
-      SELECT l.*, u.username as seller_name 
-      FROM listings l
-      JOIN users u ON l.seller_id = u.id
-      WHERE l.id = $1
-    `;
-
-    const { rows } = await pool.query(query, [id]);
-    return rows[0];
+    const result = await pool.query(
+      "SELECT listings.*, users.username as seller_name FROM listings JOIN users ON listings.seller_id = users.id WHERE listings.id = $1",
+      [id]
+    );
+    return result.rows[0];
   }
 
-  static async update(id, sellerId, updateData) {
-    const allowedUpdates = [
-      "title",
-      "description",
-      "price",
-      "category",
-      "duration",
-      "in_stock",
-    ];
-    const updates = [];
-    const values = [id, sellerId];
-    let valueCount = 3;
-
-    for (const [key, value] of Object.entries(updateData)) {
-      if (allowedUpdates.includes(key)) {
-        updates.push(`${key} = $${valueCount}`);
-        values.push(value);
-        valueCount++;
-      }
-    }
-
-    if (updates.length === 0) return null;
+  static async update(id, listingData) {
+    const { title, description, price, category, duration, features } =
+      listingData;
 
     const query = `
       UPDATE listings 
-      SET ${updates.join(", ")}, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1 AND seller_id = $2
+      SET title = $1, description = $2, price = $3, category = $4, duration = $5, features = $6
+      WHERE id = $7
       RETURNING *
     `;
+
+    const values = [
+      title,
+      description,
+      price,
+      category,
+      duration,
+      features || [],
+      id,
+    ];
 
     const { rows } = await pool.query(query, values);
     return rows[0];
@@ -121,6 +118,14 @@ class Listing {
 
     const { rows } = await pool.query(query, [id, sellerId]);
     return rows[0];
+  }
+
+  static async getByUserId(userId) {
+    const result = await pool.query(
+      "SELECT listings.*, users.username as seller_name FROM listings JOIN users ON listings.seller_id = users.id WHERE seller_id = $1",
+      [userId]
+    );
+    return result.rows;
   }
 }
 

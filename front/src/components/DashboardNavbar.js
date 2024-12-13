@@ -100,7 +100,7 @@ function DashboardNavbar() {
               </Link>
             ) : userData.role === "seller" ? (
               <Link
-                to="/seller"
+                to="/dashboard"
                 className="text-sm font-medium text-textSecondary hover:text-textPrimary transition-colors"
               >
                 Seller Dashboard

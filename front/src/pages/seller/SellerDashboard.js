@@ -17,7 +17,9 @@ function SellerDashboard() {
     price: "",
     category: "",
     duration: "",
+    features: [],
   });
+  const [newFeature, setNewFeature] = useState("");
 
   useEffect(() => {
     if (sellerStatus === "verified") {
@@ -52,6 +54,7 @@ function SellerDashboard() {
         price: "",
         category: "",
         duration: "",
+        features: [],
       });
       fetchListings();
     } catch (error) {
@@ -78,8 +81,27 @@ function SellerDashboard() {
       price: listing.price,
       category: listing.category,
       duration: listing.duration,
+      features: listing.features,
     });
     setIsAddingListing(true);
+  };
+
+  const addFeature = (e) => {
+    e.preventDefault();
+    if (newFeature.trim()) {
+      setFormData({
+        ...formData,
+        features: [...formData.features, newFeature.trim()],
+      });
+      setNewFeature("");
+    }
+  };
+
+  const removeFeature = (index) => {
+    setFormData({
+      ...formData,
+      features: formData.features.filter((_, i) => i !== index),
+    });
   };
 
   const renderStatusMessage = () => {
@@ -166,6 +188,7 @@ function SellerDashboard() {
                     price: "",
                     category: "",
                     duration: "",
+                    features: [],
                   });
                 }}
                 className="bg-accent text-white px-4 py-2 rounded-lg text-sm"
@@ -220,18 +243,15 @@ function SellerDashboard() {
                   required
                 >
                   <option value="">Select Category</option>
-                  {categories.map((category) => {
-                    const Icon = category.icon;
-                    return (
-                      <option key={category.id} value={category.name}>
-                        {category.name}
-                      </option>
-                    );
-                  })}
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="text"
-                  placeholder="Duration (e.g., 30 days)"
+                  placeholder="Duration (e.g., 1 month)"
                   value={formData.duration}
                   onChange={(e) =>
                     setFormData({ ...formData, duration: e.target.value })
@@ -239,6 +259,64 @@ function SellerDashboard() {
                   className="w-full bg-secondary/50 rounded-lg px-4 py-2 text-textPrimary"
                   required
                 />
+
+                {/* Features Section */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-textSecondary block">
+                    Features
+                  </label>
+
+                  {/* Feature List */}
+                  <div className="space-y-2">
+                    {formData.features.map((feature, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 bg-secondary/30 rounded-lg p-2"
+                      >
+                        <span className="text-sm text-textPrimary flex-1">
+                          {feature}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeFeature(index)}
+                          className="text-red-500 hover:text-red-500/80 transition-colors"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add Feature Input */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Add a feature (e.g., Full access to premium features)"
+                      value={newFeature}
+                      onChange={(e) => setNewFeature(e.target.value)}
+                      className="flex-1 bg-secondary/50 rounded-lg px-4 py-2 text-textPrimary text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={addFeature}
+                      className="bg-accent text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap"
+                    >
+                      Add Feature
+                    </button>
+                  </div>
+                </div>
+
                 <div className="flex gap-2">
                   <button
                     type="submit"

@@ -8,6 +8,7 @@ import WalletPage from "./pages/WalletPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ProductDetails from "./pages/marketplace/components/ProductDetails";
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/marketplace/:id"
+          element={
+            <ProtectedRoute>
+              <ProductDetails />
             </ProtectedRoute>
           }
         />

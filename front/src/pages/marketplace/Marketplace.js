@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import { listingService } from "../../services/listingService";
 import { categories, getCategoryByName } from "../../config/categories";
 import { grid } from "ldrs";
+import { useNavigate } from "react-router-dom";
 
 function Marketplace() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Configure loader
   grid.register();
@@ -56,7 +58,7 @@ function Marketplace() {
       JSON.stringify({ ...userWallet, coins: newBalance })
     );
     alert(`Successfully purchased ${listing.title}!`);
-    window.location.reload();
+    navigate("/marketplace");
   };
 
   return (
@@ -137,7 +139,8 @@ function Marketplace() {
                   key={listing.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 space-y-4"
+                  className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 space-y-4 cursor-pointer hover:bg-secondary/60 transition-colors"
+                  onClick={() => navigate(`/marketplace/${listing.id}`)}
                 >
                   <div className="flex justify-between items-start">
                     <div>
