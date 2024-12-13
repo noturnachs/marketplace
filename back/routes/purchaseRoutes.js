@@ -52,4 +52,26 @@ router.get("/my-sales", protect, async (req, res) => {
   }
 });
 
+router.put("/:id/status", protect, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, account_details } = req.body;
+
+    const purchase = await Purchase.updateStatus(id, {
+      status,
+      account_details,
+    });
+
+    res.json({
+      success: true,
+      data: purchase,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

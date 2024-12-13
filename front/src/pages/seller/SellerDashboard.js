@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { listingService } from "../../services/listingService";
 import { purchaseService } from "../../services/purchaseService";
 import { categories, getCategoryByName } from "../../config/categories";
+import SendAccountModal from "../../components/SendAccountModal";
 
 function SellerDashboard() {
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
@@ -23,6 +24,9 @@ function SellerDashboard() {
   const [newFeature, setNewFeature] = useState("");
   const [sales, setSales] = useState([]);
   const [totalSales, setTotalSales] = useState(0);
+  const [showSendAccountModal, setShowSendAccountModal] = useState(false);
+  const [selectedSaleId, setSelectedSaleId] = useState(null);
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   useEffect(() => {
     if (sellerStatus === "verified") {
@@ -157,6 +161,40 @@ function SellerDashboard() {
     }
   };
 
+  const handleSendAccount = (saleId) => {
+    setSelectedSaleId(saleId);
+    setShowSendAccountModal(true);
+  };
+
+  const handleSubmitAccountDetails = async (accountDetails) => {
+    try {
+      setIsPurchasing(true);
+      await purchaseService.updateStatus(selectedSaleId, {
+        status: "completed",
+        account_details: accountDetails,
+      });
+      setShowSendAccountModal(false);
+      fetchSales();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
+
+  const handleCancelOrder = async (saleId) => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
+    try {
+      await purchaseService.updateStatus(saleId, {
+        status: "cancelled",
+      });
+      fetchSales(); // Refresh sales list
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -206,24 +244,51 @@ function SellerDashboard() {
                 </p>
               ) : (
                 sales.map((sale) => (
-                  <div
-                    key={sale.id}
-                    className="bg-secondary/50 rounded-lg p-4 flex justify-between items-center"
-                  >
-                    <div>
-                      <h3 className="font-medium text-textPrimary">
-                        {sale.listing_title}
-                      </h3>
-                      <p className="text-sm text-textSecondary">
-                        Purchased by {sale.buyer_name}
-                      </p>
-                      <p className="text-xs text-textSecondary">
-                        {new Date(sale.created_at).toLocaleDateString()}
+                  <div key={sale.id} className="bg-secondary/50 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="font-medium text-textPrimary">
+                          {sale.listing_title}
+                        </h3>
+                        <p className="text-sm text-textSecondary">
+                          Purchased by {sale.buyer_name}
+                        </p>
+                        <p className="text-xs text-textSecondary">
+                          {new Date(sale.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="text-accent font-medium">
+                        ₱{parseFloat(sale.amount).toFixed(2)}
                       </p>
                     </div>
-                    <p className="text-accent font-medium">
-                      ₱{parseFloat(sale.amount).toFixed(2)}
-                    </p>
+
+                    {sale.status === "awaiting_seller" && (
+                      <div className="border-t border-white/10 pt-3 mt-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                          <p className="text-sm text-yellow-500 font-medium">
+                            Action Required
+                          </p>
+                        </div>
+                        <p className="text-sm text-textSecondary mb-3">
+                          Please send the account details to complete this order
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSendAccount(sale.id)}
+                            className="px-3 py-1.5 bg-accent text-white text-sm rounded-lg hover:bg-accent/90 transition-colors"
+                          >
+                            Send Account Details
+                          </button>
+                          <button
+                            onClick={() => handleCancelOrder(sale.id)}
+                            className="px-3 py-1.5 bg-secondary/50 text-textSecondary text-sm rounded-lg hover:text-textPrimary transition-colors"
+                          >
+                            Cancel Order
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               )}
@@ -446,6 +511,13 @@ function SellerDashboard() {
           </div>
         </>
       )}
+
+      <SendAccountModal
+        isOpen={showSendAccountModal}
+        onClose={() => setShowSendAccountModal(false)}
+        onSubmit={handleSubmitAccountDetails}
+        isLoading={isPurchasing}
+      />
     </motion.div>
   );
 }

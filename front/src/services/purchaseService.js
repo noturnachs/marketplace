@@ -32,4 +32,19 @@ export const purchaseService = {
     if (!response.ok) throw new Error(data.error);
     return data.data;
   },
+
+  async updateStatus(purchaseId, data) {
+    const response = await fetch(`${API_URL}/${purchaseId}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    return result.data;
+  },
 };

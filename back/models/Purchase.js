@@ -46,8 +46,8 @@ class Purchase {
 
       // Create purchase record
       const purchaseResult = await client.query(
-        `INSERT INTO purchases (buyer_id, listing_id, amount)
-         VALUES ($1, $2, $3)
+        `INSERT INTO purchases (buyer_id, listing_id, amount, status)
+         VALUES ($1, $2, $3, 'awaiting_seller')
          RETURNING *`,
         [buyer_id, listing_id, listing.price]
       );
@@ -68,7 +68,9 @@ class Purchase {
         p.*,
         l.title as listing_title,
         l.description as listing_description,
-        u.username as seller_name
+        u.username as seller_name,
+        p.status,
+        p.account_details
       FROM purchases p
       JOIN listings l ON p.listing_id = l.id
       JOIN users u ON l.seller_id = u.id
@@ -96,6 +98,59 @@ class Purchase {
 
     const { rows } = await pool.query(query, [sellerId]);
     return rows;
+  }
+
+  static async updateStatus(id, { status, account_details }) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      // Get purchase details first
+      const purchaseResult = await client.query(
+        `SELECT p.*, l.seller_id 
+         FROM purchases p
+         JOIN listings l ON p.listing_id = l.id
+         WHERE p.id = $1`,
+        [id]
+      );
+      const purchase = purchaseResult.rows[0];
+
+      if (!purchase) {
+        throw new Error("Purchase not found");
+      }
+
+      // If cancelling, process refund
+      if (status === "cancelled") {
+        // Refund buyer
+        await client.query(
+          "UPDATE wallets SET coins = coins + $1 WHERE user_id = $2",
+          [purchase.amount, purchase.buyer_id]
+        );
+
+        // Deduct from seller
+        await client.query(
+          "UPDATE wallets SET coins = coins - $1 WHERE user_id = $2",
+          [purchase.amount, purchase.seller_id]
+        );
+      }
+
+      // Update purchase status
+      const updateResult = await client.query(
+        `UPDATE purchases 
+         SET status = $1, account_details = $2
+         WHERE id = $3
+         RETURNING *`,
+        [status, account_details, id]
+      );
+
+      await client.query("COMMIT");
+      return updateResult.rows[0];
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 }
 

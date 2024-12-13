@@ -197,10 +197,34 @@ function ProfilePage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                      <p className="text-sm text-yellow-500">
-                        Waiting for {purchase.seller_name} to send the account
-                      </p>
+                      {purchase.status === "awaiting_seller" ? (
+                        <>
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                          <p className="text-sm text-yellow-500">
+                            Waiting for {purchase.seller_name} to send the
+                            account
+                          </p>
+                        </>
+                      ) : purchase.status === "completed" ? (
+                        <>
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <div className="text-sm">
+                            <p className="text-green-500 font-medium mb-1">
+                              Account Details:
+                            </p>
+                            <p className="text-textPrimary bg-secondary/50 p-2 rounded-lg font-mono whitespace-pre-wrap">
+                              {purchase.account_details}
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <p className="text-sm text-red-500">
+                            Order cancelled
+                          </p>
+                        </>
+                      )}
                     </div>
                     <div className="text-xs text-textSecondary mt-2">
                       <p>Transaction ID: {purchase.id}</p>
