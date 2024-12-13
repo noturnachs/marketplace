@@ -55,6 +55,10 @@ export const authService = {
       const response = await fetch(`${API_URL}/me`, {
         method: "GET",
         credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
