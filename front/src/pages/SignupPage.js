@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { authService } from "../services/authService";
 
 function SignupPage() {
   const [formData, setFormData] = useState({
@@ -15,9 +16,10 @@ function SignupPage() {
     vouchLink: "",
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -61,21 +63,26 @@ function SignupPage() {
       return;
     }
 
-    // Store user data (in a real app, this would be an API call)
-    localStorage.setItem(
-      "userData",
-      JSON.stringify({
+    setIsLoading(true);
+
+    try {
+      await authService.register({
         username: formData.username,
         email: formData.email,
+        password: formData.password,
         role: formData.role,
         accountTypes: formData.accountTypes,
         sellingExperience: formData.sellingExperience,
-        hasVouches: formData.hasVouches,
+        hasVouches: formData.hasVouches === "yes",
         vouchLink: formData.vouchLink,
-      })
-    );
+      });
 
-    navigate("/login");
+      navigate("/login");
+    } catch (error) {
+      setError(error.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLoginClick = (e) => {
@@ -371,9 +378,10 @@ function SignupPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
+              disabled={isLoading}
               className="w-full bg-accent text-white py-2.5 rounded-lg font-medium hover:bg-accent/90 transition-colors text-sm"
             >
-              Create Account
+              {isLoading ? "Creating Account..." : "Create Account"}
             </motion.button>
 
             {/* Terms */}

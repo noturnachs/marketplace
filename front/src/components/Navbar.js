@@ -1,10 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/authService";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        await authService.checkAuth();
+        setIsAuthenticated(true);
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   const handleLogin = () => {
     navigate("/login");
@@ -14,6 +29,16 @@ function Navbar() {
   const handleSignup = () => {
     navigate("/signup");
     setIsMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      setIsAuthenticated(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -29,18 +54,37 @@ function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex gap-4">
-            <button
-              onClick={handleLogin}
-              className="text-sm text-textSecondary hover:text-textPrimary transition-colors"
-            >
-              Login
-            </button>
-            <button
-              onClick={handleSignup}
-              className="bg-accent/90 text-white px-4 py-1.5 rounded-lg hover:bg-accent transition-colors text-sm font-medium"
-            >
-              Sign Up
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="text-sm text-textSecondary hover:text-textPrimary transition-colors"
+                >
+                  Marketplace
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-textSecondary hover:text-textPrimary transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleLogin}
+                  className="text-sm text-textSecondary hover:text-textPrimary transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={handleSignup}
+                  className="bg-accent/90 text-white px-4 py-1.5 rounded-lg hover:bg-accent transition-colors text-sm font-medium"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -77,18 +121,37 @@ function Navbar() {
               className="md:hidden"
             >
               <div className="flex flex-col gap-3 pt-3 pb-2">
-                <button
-                  onClick={handleLogin}
-                  className="text-sm text-textSecondary hover:text-textPrimary transition-colors py-1.5"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={handleSignup}
-                  className="bg-accent/90 text-white px-4 py-1.5 rounded-lg hover:bg-accent transition-colors text-sm font-medium"
-                >
-                  Sign Up
-                </button>
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      onClick={() => navigate("/marketplace")}
+                      className="text-sm text-textSecondary hover:text-textPrimary transition-colors py-1.5"
+                    >
+                      Marketplace
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="text-sm text-textSecondary hover:text-textPrimary transition-colors py-1.5"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleLogin}
+                      className="text-sm text-textSecondary hover:text-textPrimary transition-colors py-1.5"
+                    >
+                      Login
+                    </button>
+                    <button
+                      onClick={handleSignup}
+                      className="bg-accent/90 text-white px-4 py-1.5 rounded-lg hover:bg-accent transition-colors text-sm font-medium"
+                    >
+                      Sign Up
+                    </button>
+                  </>
+                )}
               </div>
             </motion.div>
           )}

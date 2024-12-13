@@ -1,25 +1,88 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { paymentService } from "../../services/paymentService";
+import qr100 from "./QRCodes/gcash-100.jpg";
+import qr200 from "./QRCodes/gcash-200.jpg";
+import qr300 from "./QRCodes/gcash-300.jpg";
+import qr400 from "./QRCodes/gcash-400.jpg";
+import qr500 from "./QRCodes/gcash-500.jpg";
+import qr1000 from "./QRCodes/gcash-1000.jpg";
 
 function UserWallet() {
   const [showCashIn, setShowCashIn] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState(null);
+  const [showQR, setShowQR] = useState(false);
+  const [paymentReference, setPaymentReference] = useState("");
+  const [walletData, setWalletData] = useState({ coins: 0, pendingCoins: 0 });
+  const [error, setError] = useState(null);
 
-  // Mock wallet data (in real app, this would come from an API/backend)
-  const walletData = JSON.parse(localStorage.getItem("userWallet")) || {
-    coins: 0,
-    pendingCoins: 0,
+  const qrCodes = {
+    100: qr100,
+    200: qr200,
+    300: qr300,
+    400: qr400,
+    500: qr500,
+    1000: qr1000,
+  };
+
+  useEffect(() => {
+    fetchWalletData();
+  }, []);
+
+  const fetchWalletData = async () => {
+    try {
+      const payments = await paymentService.getMyPayments();
+      const approvedCoins = payments
+        .filter((p) => p.status === "approved")
+        .reduce((sum, p) => sum + p.coins, 0);
+      const pendingCoins = payments
+        .filter((p) => p.status === "pending")
+        .reduce((sum, p) => sum + p.coins, 0);
+
+      setWalletData({
+        coins: approvedCoins,
+        pendingCoins: pendingCoins,
+      });
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleCashIn = async (option) => {
+    try {
+      const referenceId = `GC${Math.random()
+        .toString(36)
+        .substr(2, 9)
+        .toUpperCase()}`;
+      setPaymentReference(referenceId);
+
+      await paymentService.createPayment({
+        amount: option.amount,
+        coins: option.coins,
+        referenceId,
+        paymentMethod: "GCash",
+      });
+
+      setSelectedAmount(option);
+      setShowQR(true);
+      fetchWalletData(); // Refresh wallet data
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   const cashInOptions = [
     { amount: 100, coins: 100, price: "₱100" },
-    { amount: 500, coins: 525, price: "₱500" },
-    { amount: 1000, coins: 1100, price: "₱1000" },
-    { amount: 2000, coins: 2300, price: "₱2000" },
+    { amount: 200, coins: 200, price: "₱200" },
+    { amount: 300, coins: 300, price: "₱300" },
+    { amount: 400, coins: 400, price: "₱400" },
+    { amount: 500, coins: 500, price: "₱500" },
+    { amount: 1000, coins: 1000, price: "₱1000" },
   ];
 
-  const handleCashIn = (option) => {
-    // In a real app, this would open a payment gateway
-    alert(`Processing payment of ${option.price} for ${option.coins} coins`);
+  const handleClose = () => {
+    setShowQR(false);
+    setSelectedAmount(null);
   };
 
   return (
@@ -69,17 +132,88 @@ function UserWallet() {
                   {option.coins} coins
                 </p>
                 <p className="text-xs text-textSecondary">{option.price}</p>
-                {option.coins > option.amount && (
-                  <p className="text-xs text-green-500">
-                    +{option.coins - option.amount} bonus
-                  </p>
-                )}
               </button>
             ))}
           </div>
           <p className="text-xs text-textSecondary text-center">
-            1 coin = ₱1 • Bonus coins on larger purchases
+            1 coin = ₱1 • GCash payments only
           </p>
+        </motion.div>
+      )}
+
+      {/* QR Code Modal */}
+      {showQR && selectedAmount && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={handleClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-secondary/95 backdrop-blur-lg rounded-xl p-6 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-textPrimary mb-2">
+                GCash Payment
+              </h3>
+              <p className="text-sm text-textSecondary">
+                Amount: ₱{selectedAmount.amount}
+              </p>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg mb-6">
+              <div className="max-h-[400px] overflow-y-auto">
+                <img
+                  src={qrCodes[selectedAmount.amount]}
+                  alt={`GCash QR for ₱${selectedAmount.amount}`}
+                  className="w-full h-auto object-contain mx-auto"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="text-sm text-textSecondary space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/10 text-accent">
+                    1
+                  </span>
+                  <p>Open your GCash app</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/10 text-accent">
+                    2
+                  </span>
+                  <p>Scan this QR code</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/10 text-accent">
+                    3
+                  </span>
+                  <p>Complete the payment</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/10 text-accent">
+                    4
+                  </span>
+                  <p>Your coins will be credited automatically</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleClose}
+                className="w-full bg-secondary/50 text-textSecondary py-3 rounded-lg text-sm font-medium hover:bg-secondary/70 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+
+            <p className="text-sm text-textSecondary text-center mt-2">
+              Reference: {paymentReference}
+            </p>
+          </motion.div>
         </motion.div>
       )}
     </motion.div>

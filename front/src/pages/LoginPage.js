@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { authService } from "../services/authService";
 
 function LoginPage() {
   const [credentials, setCredentials] = useState({
@@ -8,37 +9,34 @@ function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
-    // Mock user database (in a real app, this would be an API call)
-    const mockUsers = [
-      { username: "admin", password: "admin", role: "buyer" },
-      { username: "seller1", password: "seller1", role: "seller" },
-    ];
-
-    const user = mockUsers.find(
-      (u) =>
-        u.username === credentials.username &&
-        u.password === credentials.password
-    );
-
-    if (user) {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem(
-        "userData",
-        JSON.stringify({
-          username: user.username,
-          role: user.role,
-          email: `${user.username}@example.com`, // Mock email
-          joinDate: "March 2024", // Mock join date
-        })
+    try {
+      const response = await authService.login(
+        credentials.username,
+        credentials.password
       );
-      navigate("/dashboard");
-    } else {
-      setError("Invalid credentials");
+
+      localStorage.setItem("userData", JSON.stringify(response.user));
+      const userData = JSON.parse(localStorage.getItem("userData"));
+
+      if (userData.role === "admin") {
+        navigate("/admin");
+      } else if (userData.role === "seller") {
+        navigate("/seller");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      setError(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -125,9 +123,10 @@ function LoginPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
+              disabled={isLoading}
               className="w-full bg-accent text-white py-2.5 rounded-lg font-medium hover:bg-accent/90 transition-colors text-sm"
             >
-              Sign In
+              {isLoading ? "Signing in..." : "Sign In"}
             </motion.button>
 
             {/* Additional Links */}

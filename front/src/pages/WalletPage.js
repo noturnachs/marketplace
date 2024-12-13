@@ -38,7 +38,7 @@ function WalletPage() {
 
         <UserWallet />
 
-        <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
+        {/* <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
           <h2 className="text-lg font-semibold text-textPrimary mb-4">
             Payment Methods
           </h2>
@@ -89,7 +89,7 @@ function WalletPage() {
               More payment methods coming soon
             </p>
           </div>
-        </div>
+        </div> */}
       </main>
     </div>
   );

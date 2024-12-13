@@ -1,61 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { listingService } from "../../services/listingService";
+import { categories, getCategoryByName } from "../../config/categories";
+import { grid } from "ldrs";
 
 function Marketplace() {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [listings, setListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const categories = [
-    "All",
-    "AI Sites/Apps",
-    "Music Prems",
-    "Ent. Prems",
-    "Educational/Office Prems",
-    "Productivity Prems",
-    "Photo Editing Prems",
-    "VPN Prems",
-    "Unlocks",
-    "OTP Services",
-    "Smart/Globe GB",
-  ];
+  // Configure loader
+  grid.register();
 
-  const listings = [
-    {
-      id: "LST001",
-      product: "Netflix Premium",
-      price: 199,
-      duration: "1 Month",
-      seller: "PremiumSeller",
-      category: "Ent. Prems",
-      inStock: true,
-      description: "UHD/4K Quality • 4 Screens • No Sharing",
-      rating: 4.8,
-      sales: 150,
-    },
-    {
-      id: "LST002",
-      product: "Spotify Premium",
-      price: 90,
-      duration: "1 Month",
-      seller: "MusicDeals",
-      category: "Music Prems",
-      inStock: true,
-      description: "Individual Plan • Ad-free • Offline Mode",
-      rating: 4.9,
-      sales: 200,
-    },
-    {
-      id: "LST003",
-      product: "ChatGPT Plus",
-      price: 299,
-      duration: "1 Month",
-      seller: "AIProvider",
-      category: "AI Sites/Apps",
-      inStock: false,
-      description: "GPT-4 • DALL-E • Advanced Features",
-      rating: 4.7,
-      sales: 85,
-    },
-  ];
+  const allCategory = {
+    id: "all",
+    name: "All",
+    icon: null,
+    color: "text-accent",
+  };
+
+  useEffect(() => {
+    fetchListings();
+  }, []);
+
+  const fetchListings = async () => {
+    try {
+      const data = await listingService.getAll();
+      setListings(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredListings =
     selectedCategory === "All"
@@ -77,7 +55,7 @@ function Marketplace() {
       "userWallet",
       JSON.stringify({ ...userWallet, coins: newBalance })
     );
-    alert(`Successfully purchased ${listing.product}!`);
+    alert(`Successfully purchased ${listing.title}!`);
     window.location.reload();
   };
 
@@ -94,81 +72,116 @@ function Marketplace() {
           Categories
         </h2>
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? "bg-accent text-white"
-                  : "bg-secondary/30 text-textSecondary hover:text-textPrimary"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          <button
+            onClick={() => setSelectedCategory("All")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedCategory === "All"
+                ? "bg-accent text-white"
+                : "bg-secondary/30 text-textSecondary hover:text-textPrimary"
+            }`}
+          >
+            All
+          </button>
+          {categories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.name)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  selectedCategory === category.name
+                    ? "bg-accent text-white"
+                    : "bg-secondary/30 text-textSecondary hover:text-textPrimary"
+                }`}
+              >
+                <Icon
+                  className={`w-4 h-4 ${
+                    selectedCategory === category.name
+                      ? "text-white"
+                      : category.color
+                  }`}
+                />
+                {category.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredListings.map((listing) => (
-          <motion.div
-            key={listing.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 space-y-4"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold text-textPrimary">
-                  {listing.product}
-                </h3>
-                <p className="text-sm text-textSecondary">{listing.duration}</p>
-              </div>
-              <p className="text-lg font-bold text-accent">
-                {listing.price} <span className="text-sm">coins</span>
-              </p>
-            </div>
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-lg">
+          {error}
+        </div>
+      )}
 
-            <p className="text-sm text-textSecondary">{listing.description}</p>
-
-            <div className="flex justify-between items-center text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-textSecondary">Seller:</span>
-                <span className="text-textPrimary">{listing.seller}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-yellow-500">★</span>
-                <span className="text-textPrimary">{listing.rating}</span>
-              </div>
+      {/* Loading State with ldrs animation */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <l-grid size="50" speed="1.5" color="white"></l-grid>
+        </div>
+      ) : (
+        /* Listings Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredListings.length === 0 ? (
+            <div className="col-span-full text-center text-textSecondary py-8">
+              No listings found in this category.
             </div>
+          ) : (
+            filteredListings.map((listing) => {
+              const category = getCategoryByName(listing.category);
+              const Icon = category?.icon;
 
-            <div className="flex justify-between items-center">
-              <span
-                className={`text-xs px-2 py-1 rounded-full ${
-                  listing.inStock
-                    ? "bg-green-500/10 text-green-500"
-                    : "bg-red-500/10 text-red-500"
-                }`}
-              >
-                {listing.inStock ? "In Stock" : "Out of Stock"}
-              </span>
-              <button
-                onClick={() => handlePurchase(listing)}
-                disabled={!listing.inStock}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  listing.inStock
-                    ? "bg-accent text-white hover:bg-accent/90 transition-colors"
-                    : "bg-secondary/30 text-textSecondary cursor-not-allowed"
-                }`}
-              >
-                Purchase
-              </button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+              return (
+                <motion.div
+                  key={listing.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 space-y-4"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        {Icon && (
+                          <Icon className={`w-5 h-5 ${category.color}`} />
+                        )}
+                        <h3 className="text-lg font-semibold text-textPrimary">
+                          {listing.title}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-textSecondary">
+                        {listing.duration}
+                      </p>
+                    </div>
+                    <p className="text-lg font-bold text-accent">
+                      ₱{listing.price} <span className="text-sm">coins</span>
+                    </p>
+                  </div>
+
+                  <p className="text-sm text-textSecondary">
+                    {listing.description}
+                  </p>
+
+                  <div className="flex justify-between items-center text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-textSecondary">Seller:</span>
+                      <span className="text-textPrimary">
+                        {listing.seller_name}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handlePurchase(listing)}
+                      className="bg-accent/90 text-white px-4 py-1.5 rounded-lg hover:bg-accent transition-colors text-sm font-medium"
+                    >
+                      Purchase
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }

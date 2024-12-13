@@ -3,10 +3,9 @@ import { useState, useEffect } from "react";
 import { authService } from "../services/authService";
 import LoadingSpinner from "./LoadingSpinner";
 
-function ProtectedRoute({ children, allowedRoles = [] }) {
+function PublicRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const userData = JSON.parse(localStorage.getItem("userData")) || {};
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -27,15 +26,11 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
     return <LoadingSpinner />;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles.length > 0 && !allowedRoles.includes(userData.role)) {
-    return <Navigate to="/" replace />;
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 }
 
-export default ProtectedRoute;
+export default PublicRoute;
