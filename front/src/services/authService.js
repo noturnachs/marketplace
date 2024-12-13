@@ -15,6 +15,11 @@ export const authService = {
     if (!response.ok) {
       throw new Error(data.message || "Login failed");
     }
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+    }
+
     return data;
   },
 
@@ -32,6 +37,11 @@ export const authService = {
     if (!response.ok) {
       throw new Error(data.message || "Registration failed");
     }
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+    }
+
     return data;
   },
 
@@ -47,17 +57,20 @@ export const authService = {
       localStorage.removeItem("userData");
       localStorage.removeItem("userWallet");
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("token");
     }
   },
 
   async checkAuth() {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/me`, {
         method: "GET",
         credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
 
@@ -70,6 +83,7 @@ export const authService = {
     } catch (error) {
       localStorage.removeItem("userData");
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("token");
       throw error;
     }
   },

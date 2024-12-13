@@ -3,11 +3,16 @@ const User = require("../models/User");
 
 // Helper function to create and send token response
 const sendTokenResponse = (user, statusCode, res) => {
-  // Create token
+  // Generate token directly if getSignedJwtToken is not available
   const token = jwt.sign(
-    { id: user.id, username: user.username },
+    {
+      id: user.id,
+      username: user.username,
+    },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE }
+    {
+      expiresIn: "7d",
+    }
   );
 
   const cookieOptions = {
@@ -16,19 +21,28 @@ const sendTokenResponse = (user, statusCode, res) => {
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    domain:
-      process.env.NODE_ENV === "production"
-        ? ".onrender.com" // Allow sharing between subdomains
-        : "localhost",
   };
 
-  // Remove password from output
-  user.password = undefined;
+  console.log("Setting cookie with options:", cookieOptions);
 
-  res.status(statusCode).cookie("token", token, cookieOptions).json({
+  res.cookie("token", token, cookieOptions);
+
+  res.status(statusCode).json({
     success: true,
     token,
-    user,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      account_types: user.account_types,
+      selling_experience: user.selling_experience,
+      has_vouches: user.has_vouches,
+      vouch_link: user.vouch_link,
+      created_at: user.created_at,
+      last_login: user.last_login,
+      seller_status: user.seller_status,
+    },
   });
 };
 

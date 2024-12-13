@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const createUsersTable = async () => {
   const createTableQuery = `
@@ -92,6 +93,19 @@ class User {
 
   static async comparePassword(candidatePassword, hashedPassword) {
     return await bcrypt.compare(candidatePassword, hashedPassword);
+  }
+
+  getSignedJwtToken() {
+    return jwt.sign(
+      {
+        id: this.id,
+        username: this.username,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
   }
 }
 
