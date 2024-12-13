@@ -54,11 +54,15 @@ export const authService = {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem("userData");
-      localStorage.removeItem("userWallet");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("token");
+      localStorage.clear();
+      document.cookie =
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      if (process.env.NODE_ENV === "production") {
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.onrender.com; secure; samesite=none;";
+      }
     }
+    return true;
   },
 
   async checkAuth() {
