@@ -27,6 +27,8 @@ app.use(
         ? process.env.FRONTEND_URL
         : "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -74,3 +76,20 @@ process.on("uncaughtException", (err) => {
   // Close server & exit process
   server.close(() => process.exit(1));
 });
+
+// When setting cookies, add these options
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // true in production
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // important for cross-site cookies
+  domain:
+    process.env.NODE_ENV === "production"
+      ? ".onrender.com" // adjust this to match your domain
+      : "localhost",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
+
+// Use these options when setting cookies
+// Example in your login/register handlers:
+res.cookie("token", token, cookieOptions);
