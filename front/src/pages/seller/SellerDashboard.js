@@ -254,6 +254,7 @@ function SellerDashboard() {
                           Purchased by {sale.buyer_name}
                         </p>
                         <p className="text-xs text-textSecondary">
+                          Sold by {sale.seller_name} •{" "}
                           {new Date(sale.created_at).toLocaleDateString()}
                         </p>
                       </div>

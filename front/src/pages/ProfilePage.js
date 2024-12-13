@@ -189,6 +189,7 @@ function ProfilePage() {
                           {purchase.listing_title}
                         </h3>
                         <p className="text-xs text-textSecondary">
+                          Sold by {purchase.seller_name} •{" "}
                           {new Date(purchase.created_at).toLocaleDateString()}
                         </p>
                       </div>

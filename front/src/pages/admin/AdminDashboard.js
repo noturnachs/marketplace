@@ -2,22 +2,45 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { paymentService } from "../../services/paymentService";
+import { sellerService } from "../../services/sellerService";
 import DashboardNavbar from "../../components/DashboardNavbar";
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("pending");
   const [pendingPayments, setPendingPayments] = useState([]);
   const [allPayments, setAllPayments] = useState([]);
+  const [pendingSellers, setPendingSellers] = useState([]);
+  const [allSellers, setAllSellers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
     pendingCount: 0,
     processedToday: 0,
+    pendingSellers: 0,
   });
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchPayments();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      await Promise.all([fetchPayments(), fetchSellers()]);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const fetchSellers = async () => {
+    const pending = await sellerService.getPendingSellers();
+    const all = await sellerService.getAllSellers();
+    setPendingSellers(pending);
+    setAllSellers(all);
+    setStats((prev) => ({
+      ...prev,
+      pendingSellers: pending.length,
+    }));
+  };
 
   const fetchPayments = async () => {
     try {
@@ -65,6 +88,17 @@ function AdminDashboard() {
   const displayPayments =
     activeTab === "pending" ? pendingPayments : filteredPayments;
 
+  const handleSellerVerification = async (sellerId, status) => {
+    try {
+      await sellerService.updateStatus(sellerId, status);
+      await fetchSellers();
+      alert(`Seller ${status} successfully`);
+    } catch (error) {
+      console.error("Error updating seller status:", error);
+      alert("Failed to update seller status");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-primary">
       <DashboardNavbar />
@@ -82,7 +116,7 @@ function AdminDashboard() {
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
               <h3 className="text-sm text-textSecondary mb-2">
                 Pending Payments
@@ -99,6 +133,14 @@ function AdminDashboard() {
                 {stats.processedToday}
               </p>
             </div>
+            <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6">
+              <h3 className="text-sm text-textSecondary mb-2">
+                Pending Sellers
+              </h3>
+              <p className="text-2xl font-bold text-accent">
+                {stats.pendingSellers}
+              </p>
+            </div>
           </div>
 
           {/* Tabs and Search */}
@@ -113,7 +155,7 @@ function AdminDashboard() {
                       : "text-textSecondary hover:text-textPrimary"
                   }`}
                 >
-                  Pending Requests
+                  Pending Payments
                 </button>
                 <button
                   onClick={() => setActiveTab("all")}
@@ -124,6 +166,16 @@ function AdminDashboard() {
                   }`}
                 >
                   All Payments
+                </button>
+                <button
+                  onClick={() => setActiveTab("sellers")}
+                  className={`text-sm font-medium ${
+                    activeTab === "sellers"
+                      ? "text-accent"
+                      : "text-textSecondary hover:text-textPrimary"
+                  }`}
+                >
+                  Seller Verification
                 </button>
               </div>
               {activeTab === "all" && (
@@ -139,96 +191,245 @@ function AdminDashboard() {
               )}
             </div>
 
-            {/* Payments Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left text-sm text-textSecondary">
-                    <th className="pb-4">Date</th>
-                    <th className="pb-4">User</th>
-                    <th className="pb-4">Amount</th>
-                    <th className="pb-4">Method</th>
-                    <th className="pb-4">Reference</th>
-                    <th className="pb-4">Status</th>
-                    {activeTab === "pending" && (
+            {/* Sellers Table */}
+            {activeTab === "sellers" && (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left text-sm text-textSecondary">
+                      <th className="pb-4">Username</th>
+                      <th className="pb-4">Email</th>
+                      <th className="pb-4">Account Types</th>
+                      <th className="pb-4">Exp</th>
+                      <th className="pb-4">Vouches</th>
+                      <th className="pb-4">Status</th>
                       <th className="pb-4">Actions</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  {displayPayments.map((payment) => (
-                    <tr key={payment.id} className="border-t border-white/5">
-                      <td className="py-4 text-textPrimary">
-                        {formatDate(payment.created_at)}
-                      </td>
-                      <td className="py-4">
-                        <div>
-                          <p className="text-textPrimary">{payment.username}</p>
-                          <p className="text-xs text-textSecondary">
-                            {payment.user_id}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="py-4">
-                        <div>
-                          <p className="text-textPrimary">₱{payment.amount}</p>
-                          <p className="text-xs text-textSecondary">
-                            {payment.coins} coins
-                          </p>
-                        </div>
-                      </td>
-                      <td className="py-4 text-textPrimary">
-                        {payment.payment_method}
-                      </td>
-                      <td className="py-4 text-textPrimary">
-                        {payment.reference_id}
-                      </td>
-                      <td className="py-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            payment.status === "pending"
-                              ? "bg-yellow-500/10 text-yellow-500"
-                              : payment.status === "approved"
-                              ? "bg-green-500/10 text-green-500"
-                              : "bg-red-500/10 text-red-500"
-                          }`}
-                        >
-                          {payment.status}
-                        </span>
-                      </td>
-                      {activeTab === "pending" && (
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                    {allSellers.map((seller) => (
+                      <tr key={seller.id} className="border-t border-white/5">
+                        <td className="py-4 text-textPrimary">
+                          {seller.username}
+                        </td>
+                        <td className="py-4 text-textPrimary">
+                          {seller.email}
+                        </td>
                         <td className="py-4">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(
-                                  payment.reference_id,
-                                  "approved"
-                                )
-                              }
-                              className="px-3 py-1 bg-green-500/10 text-green-500 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(
-                                  payment.reference_id,
-                                  "rejected"
-                                )
-                              }
-                              className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs hover:bg-red-500/20 transition-colors"
-                            >
-                              Reject
-                            </button>
+                          <div className="flex flex-wrap gap-1">
+                            {seller.account_types?.map((type) => (
+                              <span
+                                key={type}
+                                className="px-2 py-1 bg-secondary/30 rounded-full text-xs text-textSecondary"
+                              >
+                                {type}
+                              </span>
+                            ))}
                           </div>
                         </td>
+                        <td className="py-4 text-textPrimary">
+                          {seller.selling_experience || "Not specified"}
+                        </td>
+                        <td className="py-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`w-2 h-2 rounded-full ${
+                                  seller.has_vouches
+                                    ? "bg-green-500"
+                                    : "bg-red-500"
+                                }`}
+                              ></span>
+                              <span>{seller.has_vouches ? "Yes" : "No"}</span>
+                            </div>
+                            {seller.vouch_link && (
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <a
+                                  href={seller.vouch_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500"
+                                >
+                                  View Vouches
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              seller.seller_status === "verified"
+                                ? "bg-green-500/10 text-green-500"
+                                : seller.seller_status === "pending"
+                                ? "bg-yellow-500/10 text-yellow-500"
+                                : "bg-red-500/10 text-red-500"
+                            }`}
+                          >
+                            {seller.seller_status}
+                          </span>
+                        </td>
+
+                        <td className="py-4">
+                          <div className="flex gap-2">
+                            {seller.seller_status === "pending" && (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    handleSellerVerification(
+                                      seller.id,
+                                      "verified"
+                                    )
+                                  }
+                                  className="px-3 py-1 bg-green-500/10 text-green-500 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
+                                >
+                                  Verify
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleSellerVerification(
+                                      seller.id,
+                                      "rejected"
+                                    )
+                                  }
+                                  className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs hover:bg-red-500/20 transition-colors"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                            {seller.seller_status === "rejected" && (
+                              <button
+                                onClick={() =>
+                                  handleSellerVerification(
+                                    seller.id,
+                                    "verified"
+                                  )
+                                }
+                                className="px-3 py-1 bg-green-500/10 text-green-500 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
+                              >
+                                Verify
+                              </button>
+                            )}
+                            {seller.seller_status === "verified" && (
+                              <button
+                                onClick={() =>
+                                  handleSellerVerification(
+                                    seller.id,
+                                    "rejected"
+                                  )
+                                }
+                                className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs hover:bg-red-500/20 transition-colors"
+                              >
+                                Suspend
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Payments Table */}
+            {activeTab !== "sellers" && (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left text-sm text-textSecondary">
+                      <th className="pb-4">Date</th>
+                      <th className="pb-4">User</th>
+                      <th className="pb-4">Amount</th>
+                      <th className="pb-4">Method</th>
+                      <th className="pb-4">Reference</th>
+                      <th className="pb-4">Status</th>
+                      {activeTab === "pending" && (
+                        <th className="pb-4">Actions</th>
                       )}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="text-sm">
+                    {displayPayments.map((payment) => (
+                      <tr key={payment.id} className="border-t border-white/5">
+                        <td className="py-4 text-textPrimary">
+                          {formatDate(payment.created_at)}
+                        </td>
+                        <td className="py-4">
+                          <div>
+                            <p className="text-textPrimary">
+                              {payment.username}
+                            </p>
+                            <p className="text-xs text-textSecondary">
+                              {payment.user_id}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="py-4">
+                          <div>
+                            <p className="text-textPrimary">
+                              ₱{payment.amount}
+                            </p>
+                            <p className="text-xs text-textSecondary">
+                              {payment.coins} coins
+                            </p>
+                          </div>
+                        </td>
+                        <td className="py-4 text-textPrimary">
+                          {payment.payment_method}
+                        </td>
+                        <td className="py-4 text-textPrimary">
+                          {payment.reference_id}
+                        </td>
+                        <td className="py-4">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              payment.status === "pending"
+                                ? "bg-yellow-500/10 text-yellow-500"
+                                : payment.status === "approved"
+                                ? "bg-green-500/10 text-green-500"
+                                : "bg-red-500/10 text-red-500"
+                            }`}
+                          >
+                            {payment.status}
+                          </span>
+                        </td>
+                        {activeTab === "pending" && (
+                          <td className="py-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() =>
+                                  handleStatusUpdate(
+                                    payment.reference_id,
+                                    "approved"
+                                  )
+                                }
+                                className="px-3 py-1 bg-green-500/10 text-green-500 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleStatusUpdate(
+                                    payment.reference_id,
+                                    "rejected"
+                                  )
+                                }
+                                className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-xs hover:bg-red-500/20 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </motion.div>
       </main>

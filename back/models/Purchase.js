@@ -88,10 +88,12 @@ class Purchase {
         p.*,
         l.title as listing_title,
         l.price,
-        u.username as buyer_name
+        u.username as buyer_name,
+        s.username as seller_name
       FROM purchases p
       JOIN listings l ON p.listing_id = l.id
       JOIN users u ON p.buyer_id = u.id
+      JOIN users s ON l.seller_id = s.id
       WHERE l.seller_id = $1
       ORDER BY p.created_at DESC
     `;
