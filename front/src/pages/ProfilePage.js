@@ -269,9 +269,9 @@ function ProfilePage() {
                                 </p>
                                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-3">
                                   <p className="text-sm text-yellow-500">
-                                    ⚠️ Important: Failure to confirm receipt
-                                    within 24 hours will void the warranty and
-                                    support for this purchase.
+                                    ⚠️ Important: Failure to confirm within 24
+                                    hours will void the warranty and support for
+                                    this purchase.
                                   </p>
                                 </div>
                                 <button

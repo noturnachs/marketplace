@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const telegramBotService = require("../services/telegramBotService");
 
 class Purchase {
   static async create({ listingId, buyerId, amount }) {
@@ -42,6 +43,30 @@ class Purchase {
          VALUES ($1, $2, $3, 'awaiting_seller', CURRENT_TIMESTAMP) 
          RETURNING *`,
         [listingId, buyerId, numAmount]
+      );
+
+      // Get listing and buyer details for the notification
+      const listingResult = await client.query(
+        `SELECT l.*, u.telegram_username as seller_telegram 
+         FROM listings l 
+         JOIN users u ON l.seller_id = u.id 
+         WHERE l.id = $1`,
+        [listingId]
+      );
+
+      const buyerResult = await client.query(
+        "SELECT username FROM users WHERE id = $1",
+        [buyerId]
+      );
+
+      const listing = listingResult.rows[0];
+      const buyer = buyerResult.rows[0];
+
+      // Send Telegram notification
+      await telegramBotService.notifySellerOfPurchase(
+        result.rows[0], // purchase
+        listing,
+        buyer
       );
 
       await client.query("COMMIT");

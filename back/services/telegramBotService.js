@@ -87,6 +87,57 @@ class TelegramBotService {
     return result.rows[0]?.verified || false;
   }
 
+  async notifySellerOfPurchase(purchase, listing, buyer) {
+    try {
+      // Get seller's telegram username from the database
+      const { rows } = await pool.query(
+        "SELECT telegram_username FROM users WHERE id = $1",
+        [listing.seller_id]
+      );
+
+      const sellerTelegram = rows[0]?.telegram_username;
+      if (!sellerTelegram) {
+        console.error("No telegram username found for seller");
+        return;
+      }
+
+      // Format the message
+      const message = `
+🛍️ New Purchase Alert!
+
+Product: ${listing.title}
+Price: ₱${purchase.amount}
+Buyer: ${buyer.username}
+
+⚡ Please log in to your account to process this order:
+${process.env.FRONTEND_URL}/dashboard?tab=seller
+
+⏰ Note: Order will auto-cancel in 1 hour if not processed.
+      `;
+
+      // Find chat ID for the seller (if they've interacted with the bot)
+      const chatId = await this.findChatIdByUsername(sellerTelegram);
+      if (chatId) {
+        await this.bot.sendMessage(chatId, message, { parse_mode: "HTML" });
+      }
+    } catch (error) {
+      console.error("Error sending Telegram notification:", error);
+    }
+  }
+
+  async findChatIdByUsername(username) {
+    try {
+      const result = await pool.query(
+        "SELECT chat_id FROM telegram_chats WHERE username = $1",
+        [username]
+      );
+      return result.rows[0]?.chat_id;
+    } catch (error) {
+      console.error("Error finding chat ID:", error);
+      return null;
+    }
+  }
+
   setupListeners() {
     this.bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
@@ -112,6 +163,23 @@ class TelegramBotService {
           chatId,
           "❌ Invalid or expired verification code."
         );
+      }
+    });
+
+    // Store chat IDs when users interact with the bot
+    this.bot.on("message", async (msg) => {
+      if (msg.from.username) {
+        try {
+          await pool.query(
+            `INSERT INTO telegram_chats (username, chat_id) 
+             VALUES ($1, $2) 
+             ON CONFLICT (username) 
+             DO UPDATE SET chat_id = EXCLUDED.chat_id`,
+            [msg.from.username, msg.chat.id]
+          );
+        } catch (error) {
+          console.error("Error storing chat ID:", error);
+        }
       }
     });
   }

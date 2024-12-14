@@ -28,6 +28,8 @@ function SellerDashboard() {
   const [showSendAccountModal, setShowSendAccountModal] = useState(false);
   const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [isEditingTelegram, setIsEditingTelegram] = useState(false);
+  const [newTelegramUsername, setNewTelegramUsername] = useState("");
 
   useEffect(() => {
     if (sellerStatus === "verified") {
@@ -193,6 +195,40 @@ function SellerDashboard() {
     }
   };
 
+  const handleUpdateTelegramUsername = async () => {
+    try {
+      // Add API call to update telegram username
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/v1/users/telegram-username`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ telegram_username: newTelegramUsername }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update Telegram username");
+      }
+
+      // Update local storage with new user data
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      userData.telegram_username = newTelegramUsername;
+      localStorage.setItem("userData", JSON.stringify(userData));
+
+      setIsEditingTelegram(false);
+      setNewTelegramUsername("");
+
+      // Show success message
+      // You might want to add a toast notification here
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -231,6 +267,89 @@ function SellerDashboard() {
               <p className="text-2xl font-semibold text-textPrimary">
                 {sales.length}
               </p>
+            </div>
+          </div>
+
+          {/* Telegram Notification Setup */}
+          <div className="bg-secondary/30 rounded-lg p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-textPrimary">
+                  Telegram Notifications
+                </h2>
+                <p className="text-sm text-textSecondary mt-1">
+                  Get instant notifications for new orders via Telegram
+                </p>
+              </div>
+              {userData.telegram_username && (
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-green-500">Connected</span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4">
+              {!userData.telegram_username ? (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                  <h3 className="text-yellow-500 font-medium mb-2">
+                    Set Up Telegram Notifications
+                  </h3>
+                  <p className="text-sm text-yellow-500/80 mb-4">
+                    Add your Telegram username to receive instant notifications
+                    when you get new orders.
+                  </p>
+                  <button
+                    onClick={() => {
+                      /* Add function to update Telegram username */
+                    }}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-500/90 transition-colors"
+                  >
+                    Add Telegram Username
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <p className="text-sm text-textSecondary mb-2">
+                      Your Telegram Username
+                    </p>
+                    <p className="text-textPrimary font-medium">
+                      @{userData.telegram_username}
+                    </p>
+                  </div>
+
+                  <div className="bg-secondary/50 rounded-lg p-4">
+                    <p className="text-sm text-textSecondary mb-2">
+                      Connect with our Bot
+                    </p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-textPrimary">
+                        1. Open Telegram and search for{" "}
+                        <span className="font-mono">
+                          @{process.env.REACT_APP_TELEGRAM_BOT_USERNAME}
+                        </span>
+                      </p>
+                      <p className="text-sm text-textPrimary">
+                        2. Start a chat with the bot by clicking "Start" or
+                        sending any message
+                      </p>
+                      <p className="text-sm text-textPrimary">
+                        3. You'll receive instant notifications for new orders
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      /* Add function to update Telegram username */
+                    }}
+                    className="text-accent hover:text-accent/80 transition-colors text-sm"
+                  >
+                    Update Telegram Username
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -616,6 +735,37 @@ function SellerDashboard() {
         onSubmit={handleSubmitAccountDetails}
         isLoading={isPurchasing}
       />
+
+      {isEditingTelegram && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-secondary rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-textPrimary mb-4">
+              Update Telegram Username
+            </h3>
+            <input
+              type="text"
+              value={newTelegramUsername}
+              onChange={(e) => setNewTelegramUsername(e.target.value)}
+              placeholder="Enter your Telegram username"
+              className="w-full bg-secondary/50 rounded-lg px-4 py-2 text-textPrimary mb-4"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setIsEditingTelegram(false)}
+                className="px-4 py-2 bg-secondary/50 text-textSecondary rounded-lg text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateTelegramUsername}
+                className="px-4 py-2 bg-accent text-white rounded-lg text-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

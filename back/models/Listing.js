@@ -60,7 +60,7 @@ class Listing {
 
   static async getAll() {
     const result = await pool.query(
-      "SELECT listings.*, users.username as seller_name FROM listings JOIN users ON listings.seller_id = users.id"
+      "SELECT listings.*, users.username as seller_name, users.telegram_username as seller_telegram FROM listings JOIN users ON listings.seller_id = users.id"
     );
     return result.rows;
   }
@@ -78,7 +78,7 @@ class Listing {
 
   static async getById(id) {
     const result = await pool.query(
-      "SELECT listings.*, users.username as seller_name FROM listings JOIN users ON listings.seller_id = users.id WHERE listings.id = $1",
+      "SELECT listings.*, users.username as seller_name, users.telegram_username as seller_telegram FROM listings JOIN users ON listings.seller_id = users.id WHERE listings.id = $1",
       [id]
     );
     return result.rows[0];
@@ -122,7 +122,7 @@ class Listing {
 
   static async getByUserId(userId) {
     const result = await pool.query(
-      "SELECT listings.*, users.username as seller_name FROM listings JOIN users ON listings.seller_id = users.id WHERE seller_id = $1",
+      "SELECT listings.*, users.username as seller_name, users.telegram_username as seller_telegram FROM listings JOIN users ON listings.seller_id = users.id WHERE seller_id = $1",
       [userId]
     );
     return result.rows;

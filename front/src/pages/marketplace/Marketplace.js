@@ -44,6 +44,7 @@ function Marketplace() {
 
   const filteredListings = listings.filter((listing) => {
     // If there's a search term, ignore category filter
+
     const searchTerm = debouncedSearchQuery.toLowerCase().trim();
     if (searchTerm) {
       return (
