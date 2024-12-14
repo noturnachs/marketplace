@@ -240,19 +240,27 @@ function SellerDashboard() {
 
       {sellerStatus === "verified" && (
         <>
-          {/* Stats Section - Updated to consider confirmation status */}
+          {/* Stats Section - Updated to show net balance after fees */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-sm text-textSecondary">Confirmed Sales</p>
+              <p className="text-sm text-textSecondary">
+                Available Balance (After Fees)
+              </p>
               <p className="text-2xl font-bold text-green-500">
-                ₱{totalCompletedSales}
+                ₱{(totalCompletedSales * 0.95).toFixed(2)}
+              </p>
+              <p className="text-xs text-textSecondary mt-1">
+                5% platform fee applied per order
               </p>
             </div>
 
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-sm text-textSecondary">Pending Sales</p>
-              <p className="text-2xl font-bold text-yellow-500">
-                ₱{totalPendingSales}
+              <p className="text-sm text-textSecondary">Gross Sales</p>
+              <p className="text-2xl font-bold text-accent">
+                ₱{totalCompletedSales.toFixed(2)}
+              </p>
+              <p className="text-xs text-textSecondary mt-1">
+                Before platform fees
               </p>
             </div>
 
@@ -262,11 +270,94 @@ function SellerDashboard() {
                 {listings.length}
               </p>
             </div>
+
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-sm text-textSecondary">Total Orders</p>
               <p className="text-2xl font-semibold text-textPrimary">
                 {sales.length}
               </p>
+            </div>
+          </div>
+
+          {/* Cashout Section */}
+          <div className="bg-secondary/30 rounded-lg p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-textPrimary">
+                  Cashout
+                </h2>
+                <p className="text-sm text-textSecondary mt-1">
+                  Convert your earnings to real money
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-textSecondary">Available Balance</p>
+                <p className="text-2xl font-bold text-green-500">
+                  ₱{(totalCompletedSales * 0.95).toFixed(2)}
+                </p>
+                <p className="text-xs text-textSecondary mt-1">After fees</p>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div className="bg-secondary/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-textPrimary mb-2">
+                  How to Cashout
+                </h3>
+                <div className="space-y-2">
+                  <p className="text-sm text-textSecondary">
+                    Contact our admin through:
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <a
+                      href="https://t.me/rizebaby01"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.716-3.818 15.515-3.818 15.515-.121.487-.477.645-.773.645-.418 0-.706-.268-.944-.511l-4.033-3.458-1.591 1.434c-.122.098-.244.146-.366.146-.245 0-.489-.171-.489-.416v-4.584l7.142-6.689c.198-.183.198-.549-.122-.549-.074 0-.171.024-.269.098l-8.733 5.555-3.624-1.263c-.489-.171-.538-.549-.05-.818l14.909-5.825c.416-.171.806.122.806.549 0 .073-.025.171-.049.171z" />
+                      </svg>
+                      <span className="text-sm">@rizebaby01</span>
+                    </a>
+                    <a
+                      href="https://t.me/grim1232"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.716-3.818 15.515-3.818 15.515-.121.487-.477.645-.773.645-.418 0-.706-.268-.944-.511l-4.033-3.458-1.591 1.434c-.122.098-.244.146-.366.146-.245 0-.489-.171-.489-.416v-4.584l7.142-6.689c.198-.183.198-.549-.122-.549-.074 0-.171.024-.269.098l-8.733 5.555-3.624-1.263c-.489-.171-.538-.549-.05-.818l14.909-5.825c.416-.171.806.122.806.549 0 .073-.025.171-.049.171z" />
+                      </svg>
+                      <span className="text-sm">@grim1232</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-secondary/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-textPrimary mb-2">
+                  Important Notes
+                </h3>
+                <ul className="list-disc list-inside space-y-1">
+                  <li className="text-sm text-textSecondary">
+                    Processing time: 24-48 hours
+                  </li>
+                  <li className="text-sm text-textSecondary">
+                    Have your payment details ready
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
