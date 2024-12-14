@@ -146,10 +146,10 @@ function ProductDetails() {
                     Seller
                   </h3>
                   <div className="space-y-1">
-                    <p className="text-sm text-textPrimary">
+                    <p className="text-sm text-blue-500">
                       {listing.seller_name}
                     </p>
-                    <p className="text-xs text-textSecondary">
+                    <p className="text-xs text-[#22c55e]">
                       Telegram: @{listing.seller_telegram}
                     </p>
                   </div>

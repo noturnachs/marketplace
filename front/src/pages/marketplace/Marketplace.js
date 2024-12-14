@@ -176,10 +176,10 @@ function Marketplace() {
 
                   <div className="flex justify-between items-center">
                     <div className="flex flex-col">
-                      <p className="text-xs text-textSecondary">
-                        Seller: {listing.seller_name}
+                      <p className="text-xs text-blue-500">
+                        {listing.seller_name}
                       </p>
-                      <p className="text-xs text-textSecondary">
+                      <p className="text-xs text-[#22c55e]">
                         @{listing.seller_telegram}
                       </p>
                     </div>
