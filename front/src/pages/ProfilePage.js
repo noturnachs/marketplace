@@ -20,47 +20,6 @@ function ProfilePage() {
     fetchPurchaseHistory();
   }, []);
 
-  const formatTimeAgo = (dateString) => {
-    const date = new Date(dateString);
-    const phTime = new Date(date.getTime() + 8 * 60 * 60 * 1000);
-    const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
-    const seconds = Math.floor((now - phTime) / 1000);
-    const minutes = Math.floor(seconds / 60);
-
-    if (minutes < 1) {
-      return "just now";
-    } else if (minutes === 1) {
-      return "1 minute ago";
-    } else if (minutes < 60) {
-      return `${minutes} minutes ago`;
-    } else {
-      return (
-        phTime.toLocaleString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-          hour12: true,
-          timeZone: "Asia/Manila",
-        }) + " PHT"
-      );
-    }
-  };
-
-  const formatPhTime = (dateString) => {
-    const date = new Date(dateString);
-    const phDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
-
-    return (
-      phDate.toLocaleString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      }) + " PHT"
-    );
-  };
-
   const fetchPurchaseHistory = async () => {
     try {
       const purchases = await purchaseService.getMyPurchases();

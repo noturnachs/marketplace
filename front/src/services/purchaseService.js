@@ -12,7 +12,6 @@ export const purchaseService = {
       body: JSON.stringify({
         listing_id: listingId,
         amount: amount,
-        created_at: new Date().toISOString(),
       }),
     });
     const data = await response.json();

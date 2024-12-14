@@ -1,20 +1,16 @@
 const pool = require("../config/db");
 
 class Purchase {
-  static async create({ listingId, buyerId, amount, created_at }) {
+  static async create({ listingId, buyerId, amount }) {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-
-      // Set timezone to Asia/Manila for this session
-      await client.query("SET timezone = 'Asia/Manila'");
 
       // Debug logs
       console.log("Purchase attempt:", {
         listingId,
         buyerId,
         amount,
-        created_at,
       });
 
       // Check wallet with debug
@@ -40,12 +36,12 @@ class Purchase {
         [numAmount, buyerId]
       );
 
-      // Create the purchase
+      // Create the purchase with CURRENT_TIMESTAMP which is in UTC by default
       const result = await client.query(
         `INSERT INTO purchases (listing_id, buyer_id, amount, status, created_at) 
-         VALUES ($1, $2, $3, 'awaiting_seller', $4) 
+         VALUES ($1, $2, $3, 'awaiting_seller', CURRENT_TIMESTAMP) 
          RETURNING *`,
-        [listingId, buyerId, numAmount, created_at]
+        [listingId, buyerId, numAmount]
       );
 
       await client.query("COMMIT");
@@ -238,17 +234,19 @@ class Purchase {
       console.log("Starting expired purchases check...");
 
       // Find purchases that are over 1 hour old and still awaiting seller
+      // Convert UTC times to PH time (UTC+8) before comparison
       const expiredPurchases = await client.query(`
         SELECT 
           p.*,
           l.seller_id,
           l.price as amount,
-          (p.created_at + INTERVAL '8 hours') as ph_created_at,
-          (NOW() + INTERVAL '8 hours') as ph_current_time
+          p.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Manila' as ph_created_at,
+          NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Manila' as ph_current_time
         FROM purchases p
         JOIN listings l ON p.listing_id = l.id
         WHERE p.status = 'awaiting_seller'
-        AND (p.created_at + INTERVAL '8 hours') < ((NOW() + INTERVAL '8 hours') - INTERVAL '1 hour')
+        AND (p.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Manila') < 
+            ((NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Manila') - INTERVAL '1 hour')
       `);
 
       console.log(`Found ${expiredPurchases.rows.length} expired purchases`);
