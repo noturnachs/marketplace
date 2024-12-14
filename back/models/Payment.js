@@ -52,7 +52,7 @@ class Payment {
     await adminNotificationService.notifyNewCashIn({
       amount: payment.amount,
       coins: payment.coins,
-      username: payment.username,
+      user_id: payment.user_id, // Include user_id here
       payment_method: payment.payment_method,
       reference_id: payment.reference_id,
     });

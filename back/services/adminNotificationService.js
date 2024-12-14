@@ -19,9 +19,9 @@ class AdminNotificationService {
       const message = `
 🔔 *New Cash-In Request*
 
-
-To be Added: ${payment.coins}
-User: ${username}
+Amount: ₱${payment.amount / 100}
+Coins: ${payment.coins}
+User: ${username || "Unknown"}
 Method: ${payment.payment_method}
 Reference: \`${payment.reference_id}\`
 
@@ -33,7 +33,8 @@ Reference: \`${payment.reference_id}\`
         disable_web_page_preview: true,
       });
     } catch (error) {
-      console.error("Error sending admin notification:", error);
+      console.error("Error in notifyNewCashIn:", error);
+      console.error("Payment object:", payment);
     }
   }
 
