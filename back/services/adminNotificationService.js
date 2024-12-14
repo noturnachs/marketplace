@@ -1,4 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
+const pool = require("../config/db");
 
 class AdminNotificationService {
   constructor() {
@@ -9,19 +10,24 @@ class AdminNotificationService {
   }
 
   async notifyNewCashIn(payment) {
-    const message = `
+    try {
+      // Fetch username using user_id
+      const userQuery = "SELECT username FROM users WHERE id = $1";
+      const { rows } = await pool.query(userQuery, [payment.user_id]);
+      const username = rows[0]?.username;
+
+      const message = `
 🔔 *New Cash-In Request*
 
-Amount: ₱${payment.amount}
-Coins: ${payment.coins}
-User: ${payment.username}
+
+To be Added: ${payment.coins}
+User: ${username}
 Method: ${payment.payment_method}
 Reference: \`${payment.reference_id}\`
 
 [View Admin Dashboard](${process.env.FRONTEND_URL}/admin)
-    `;
+      `;
 
-    try {
       await this.bot.sendMessage(this.adminGroupId, message, {
         parse_mode: "Markdown",
         disable_web_page_preview: true,
