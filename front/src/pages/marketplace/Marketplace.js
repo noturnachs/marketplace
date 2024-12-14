@@ -156,25 +156,25 @@ function Marketplace() {
                         {Icon && (
                           <Icon className={`w-5 h-5 ${category.color}`} />
                         )}
-                        <h3 className="text-lg font-semibold text-textPrimary">
+                        <h3 className="text-sm font-semibold text-textPrimary">
                           {listing.title}
                         </h3>
                       </div>
-                      <p className="text-sm text-textSecondary">
+                      <p className="text-xs text-textSecondary">
                         {listing.duration}
                       </p>
                     </div>
-                    <p className="text-lg font-bold text-accent">
+                    <p className="text-sm font-bold text-accent">
                       ₱{listing.price} <span className="text-sm">coins</span>
                     </p>
                   </div>
 
-                  <p className="text-sm text-textSecondary line-clamp-2">
+                  <p className="text-xs text-textSecondary line-clamp-2">
                     {listing.description}
                   </p>
 
                   <div className="flex justify-between items-center">
-                    <p className="text-sm text-textSecondary">
+                    <p className="text-xs text-textSecondary">
                       Seller: {listing.seller_name}
                     </p>
                     <button
