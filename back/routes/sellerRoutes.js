@@ -68,4 +68,23 @@ router.get("/balance", protect, async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const seller = await Seller.getSellerDetails(req.params.id);
+    res.json({ success: true, data: seller });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+router.put("/:id/vouches", async (req, res) => {
+  try {
+    const { vouch_link } = req.body;
+    const seller = await Seller.updateVouchLink(req.params.id, vouch_link);
+    res.json({ success: true, data: seller });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

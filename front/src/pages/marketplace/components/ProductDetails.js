@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { listingService } from "../../../services/listingService";
 import { purchaseService } from "../../../services/purchaseService";
+import { sellerService } from "../../../services/sellerService";
 import DashboardNavbar from "../../../components/DashboardNavbar";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import PurchaseConfirmationModal from "../../../components/PurchaseConfirmationModal";
@@ -19,6 +20,7 @@ function ProductDetails() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
+  const [sellerDetails, setSellerDetails] = useState(null);
 
   useEffect(() => {
     fetchListing();
@@ -29,6 +31,11 @@ function ProductDetails() {
     try {
       const data = await listingService.getById(id);
       setListing(data);
+
+      if (data.seller_id) {
+        const sellerData = await sellerService.getSellerDetails(data.seller_id);
+        setSellerDetails(sellerData);
+      }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -152,6 +159,34 @@ function ProductDetails() {
                     <p className="text-xs text-[#22c55e]">
                       Telegram: @{listing.seller_telegram}
                     </p>
+                    {sellerDetails?.vouch_link && (
+                      <a
+                        href={sellerDetails.vouch_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        View Vouches
+                      </a>
+                    )}
+                    {sellerDetails?.has_vouches &&
+                      !sellerDetails?.vouch_link && (
+                        <p className="text-xs text-yellow-500">
+                          Seller has vouches but link not available
+                        </p>
+                      )}
                   </div>
                 </div>
               </div>

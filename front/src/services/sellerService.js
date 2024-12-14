@@ -25,6 +25,33 @@ export const sellerService = {
     return data.data;
   },
 
+  async getSellerDetails(sellerId) {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/sellers/${sellerId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
+
+  async updateVouchLink(sellerId, vouchLink) {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/sellers/${sellerId}/vouches`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ vouch_link: vouchLink }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
+
   async updateStatus(sellerId, status) {
     const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/sellers/${sellerId}/status`, {

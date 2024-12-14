@@ -49,7 +49,7 @@ class Seller {
         u.id,
         u.username,
         u.email,
-        u.seller_status,
+        u.seller_status,a
         u.account_types,
         u.created_at,
         u.selling_experience,
@@ -107,6 +107,67 @@ class Seller {
         total_earnings: 0,
       }
     );
+  }
+
+  static async getSellerDetails(id) {
+    const query = `
+      SELECT 
+        u.id,
+        u.username,
+        u.email,
+        u.seller_status,
+        u.account_types,
+        u.created_at,
+        u.selling_experience,
+        u.has_vouches,
+        u.vouch_link,
+        u.last_login,
+        COUNT(DISTINCT l.id) as total_listings,
+        COUNT(DISTINCT p.id) as total_sales,
+        COALESCE(SUM(p.amount), 0) as total_earnings
+      FROM users u
+      LEFT JOIN listings l ON u.id = l.seller_id
+      LEFT JOIN purchases p ON l.id = p.listing_id
+      WHERE u.id = $1 AND u.role = 'seller'
+      GROUP BY 
+        u.id,
+        u.username,
+        u.email,
+        u.seller_status,
+        u.account_types,
+        u.created_at,
+        u.selling_experience,
+        u.has_vouches,
+        u.vouch_link,
+        u.last_login
+    `;
+
+    const { rows } = await pool.query(query, [id]);
+
+    if (rows.length === 0) {
+      throw new Error("Seller not found");
+    }
+
+    return rows[0];
+  }
+
+  static async updateVouchLink(id, vouchLink) {
+    const query = `
+      UPDATE users
+      SET 
+        vouch_link = $1,
+        has_vouches = TRUE
+      WHERE id = $2 AND role = 'seller'
+      RETURNING id, username, vouch_link, has_vouches
+    `;
+
+    const { rows } = await pool.query(query, [vouchLink, id]);
+
+    if (rows.length === 0) {
+      throw new Error("Seller not found");
+    }
+
+    return rows[0];
   }
 }
 
