@@ -80,4 +80,57 @@ export const sellerService = {
 
     return response.json();
   },
+
+  async updateFeeExemption(sellerId, isExempt) {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `${API_URL}/sellers/${sellerId}/fee-exemption`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isExempt }),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
+
+  requestWithdrawal: async (amount) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/sellers/withdraw`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ amount }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to process withdrawal");
+    }
+
+    return data;
+  },
+
+  getFeeStatus: async () => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/sellers/fee-status`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to get fee status");
+    }
+
+    return data.feeExempt;
+  },
 };

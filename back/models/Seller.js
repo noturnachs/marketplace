@@ -38,6 +38,7 @@ class Seller {
         u.has_vouches,
         u.vouch_link,
         u.last_login,
+        u.fee_exempt,
         COUNT(DISTINCT l.id) as total_listings,
         COUNT(DISTINCT p.id) as total_sales,
         COALESCE(SUM(p.amount), 0) as total_earnings
@@ -49,13 +50,14 @@ class Seller {
         u.id,
         u.username,
         u.email,
-        u.seller_status,a
+        u.seller_status,
         u.account_types,
         u.created_at,
         u.selling_experience,
         u.has_vouches,
         u.vouch_link,
-        u.last_login
+        u.last_login,
+        u.fee_exempt
       ORDER BY 
         CASE 
           WHEN u.seller_status = 'pending' THEN 1
@@ -168,6 +170,29 @@ class Seller {
     }
 
     return rows[0];
+  }
+
+  static async updateFeeExemption(sellerId, isExempt) {
+    const query = `
+      UPDATE users 
+      SET fee_exempt = $1 
+      WHERE id = $2 AND role = 'seller' 
+      RETURNING *
+    `;
+
+    const { rows } = await pool.query(query, [isExempt, sellerId]);
+    return rows[0];
+  }
+
+  static async getFeeExemptionStatus(sellerId) {
+    const query = `
+      SELECT fee_exempt 
+      FROM users 
+      WHERE id = $1 AND role = 'seller'
+    `;
+
+    const { rows } = await pool.query(query, [sellerId]);
+    return rows[0]?.fee_exempt || false;
   }
 }
 

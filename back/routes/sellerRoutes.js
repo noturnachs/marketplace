@@ -5,6 +5,22 @@ const admin = require("../middleware/admin");
 const Seller = require("../models/Seller");
 const SellerBalance = require("../models/SellerBalance");
 
+router.get("/fee-status", protect, async (req, res) => {
+  try {
+    const feeExempt = await Seller.getFeeExemptionStatus(req.user.id);
+    res.json({
+      success: true,
+      feeExempt: feeExempt,
+    });
+  } catch (error) {
+    console.error("Error fetching fee status:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch fee exemption status",
+    });
+  }
+});
+
 // Get pending sellers
 router.get("/pending", protect, admin, async (req, res) => {
   try {
@@ -84,6 +100,25 @@ router.put("/:id/vouches", async (req, res) => {
     res.json({ success: true, data: seller });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+router.put("/:id/fee-exemption", protect, admin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isExempt } = req.body;
+
+    const seller = await Seller.updateFeeExemption(id, isExempt);
+
+    res.json({
+      success: true,
+      data: seller,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 

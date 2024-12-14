@@ -18,6 +18,7 @@ function AdminDashboard() {
     pendingSellers: 0,
   });
   const [error, setError] = useState(null);
+  const [isUpdatingFee, setIsUpdatingFee] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -96,6 +97,24 @@ function AdminDashboard() {
     } catch (error) {
       console.error("Error updating seller status:", error);
       alert("Failed to update seller status");
+    }
+  };
+
+  const handleFeeExemption = async (sellerId, currentExemption) => {
+    try {
+      setIsUpdatingFee(true);
+      await sellerService.updateFeeExemption(sellerId, !currentExemption);
+      await fetchSellers(); // Refresh the sellers list
+      alert(
+        `Fee exemption ${
+          !currentExemption ? "enabled" : "disabled"
+        } successfully`
+      );
+    } catch (error) {
+      console.error("Error updating fee exemption:", error);
+      alert("Failed to update fee exemption");
+    } finally {
+      setIsUpdatingFee(false);
     }
   };
 
@@ -203,6 +222,7 @@ function AdminDashboard() {
                       <th className="pb-4">Exp</th>
                       <th className="pb-4">Vouches</th>
                       <th className="pb-4">Status</th>
+                      <th className="pb-4">Fee Status</th>
                       <th className="pb-4">Actions</th>
                     </tr>
                   </thead>
@@ -270,7 +290,25 @@ function AdminDashboard() {
                             {seller.seller_status}
                           </span>
                         </td>
-
+                        <td className="py-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                handleFeeExemption(seller.id, seller.fee_exempt)
+                              }
+                              disabled={isUpdatingFee}
+                              className={`px-3 py-1 rounded-lg text-xs transition-colors ${
+                                seller.fee_exempt
+                                  ? "bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                                  : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                              }`}
+                            >
+                              {seller.fee_exempt
+                                ? "Fee Exempt"
+                                : "Standard Fee"}
+                            </button>
+                          </div>
+                        </td>
                         <td className="py-4">
                           <div className="flex gap-2">
                             {seller.seller_status === "pending" && (

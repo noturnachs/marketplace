@@ -36,12 +36,14 @@ function SellerDashboard() {
     available_balance: "0.00",
     total_fees: "0.00",
   });
+  const [isFeeExempt, setIsFeeExempt] = useState(false);
 
   useEffect(() => {
     if (sellerStatus === "verified") {
       fetchListings();
       fetchSales();
       fetchBalance();
+      fetchFeeStatus();
     }
   }, [sellerStatus]);
 
@@ -73,6 +75,15 @@ function SellerDashboard() {
       setBalance(balanceData);
     } catch (error) {
       setError(error.message);
+    }
+  };
+
+  const fetchFeeStatus = async () => {
+    try {
+      const feeExempt = await sellerService.getFeeStatus();
+      setIsFeeExempt(feeExempt);
+    } catch (error) {
+      console.error("Error fetching fee status:", error);
     }
   };
 
@@ -266,7 +277,11 @@ function SellerDashboard() {
                 ₱{parseFloat(balance.available_balance).toFixed(2)}
               </p>
               <p className="text-xs text-textSecondary mt-1">
-                5% fee per order
+                {isFeeExempt ? (
+                  "No fees deducted"
+                ) : (
+                  <>Standard 5% fee applies</>
+                )}
               </p>
             </div>
 
@@ -309,9 +324,15 @@ function SellerDashboard() {
               <div className="text-right">
                 <p className="text-sm text-textSecondary">Available Balance</p>
                 <p className="text-2xl font-bold text-green-500">
-                  ₱{(totalCompletedSales * 0.95).toFixed(2)}
+                  ₱{parseFloat(balance.available_balance).toFixed(2)}
                 </p>
-                <p className="text-xs text-textSecondary mt-1">After fees</p>
+                <p className="text-xs text-textSecondary mt-1">
+                  {isFeeExempt ? (
+                    "No fees deducted"
+                  ) : (
+                    <>Standard 5% fee applies</>
+                  )}
+                </p>
               </div>
             </div>
 
@@ -371,6 +392,9 @@ function SellerDashboard() {
                   </li>
                   <li className="text-sm text-textSecondary">
                     Have your payment details ready
+                  </li>
+                  <li className="text-sm text-textSecondary">
+                    Minimum withdrawal amount: ₱100
                   </li>
                 </ul>
               </div>
