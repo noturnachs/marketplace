@@ -14,9 +14,13 @@ function SignupPage() {
     sellingExperience: "",
     hasVouches: "",
     vouchLink: "",
+    telegramUsername: "",
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [verificationCode, setVerificationCode] = useState(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -63,6 +67,11 @@ function SignupPage() {
       return;
     }
 
+    if (!isVerified) {
+      setError("Please verify your Telegram username first");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -75,6 +84,7 @@ function SignupPage() {
         sellingExperience: formData.sellingExperience,
         hasVouches: formData.hasVouches === "yes",
         vouchLink: formData.vouchLink,
+        telegramUsername: formData.telegramUsername,
       });
 
       navigate("/login");
@@ -97,6 +107,32 @@ function SignupPage() {
         : [...prevData.accountTypes, type];
       return { ...prevData, accountTypes };
     });
+  };
+
+  const handleTelegramVerification = async () => {
+    try {
+      setIsVerifying(true);
+      const response = await authService.generateTelegramVerification(
+        formData.telegramUsername
+      );
+      setVerificationCode(response.code);
+
+      // Start polling for verification status
+      const checkInterval = setInterval(async () => {
+        const status = await authService.checkVerification(response.code);
+        if (status.verified) {
+          setIsVerified(true);
+          clearInterval(checkInterval);
+        }
+      }, 3000);
+
+      // Stop polling after 10 minutes
+      setTimeout(() => clearInterval(checkInterval), 600000);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -371,6 +407,69 @@ function SignupPage() {
                 className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-secondary focus:border-accent focus:outline-none text-textPrimary text-sm"
                 placeholder="Confirm your password"
               />
+            </div>
+
+            {/* Telegram Username Input */}
+            <div>
+              <label className="block text-sm font-medium text-textSecondary mb-1">
+                Telegram Username
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-3 flex items-center text-textSecondary">
+                  @
+                </span>
+                <input
+                  type="text"
+                  placeholder="your_telegram_username"
+                  value={formData.telegramUsername}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      telegramUsername: e.target.value,
+                    })
+                  }
+                  className="w-full bg-secondary/50 rounded-lg pl-8 pr-4 py-2 text-textPrimary placeholder:text-textSecondary/50"
+                  required
+                />
+              </div>
+              <p className="text-xs text-textSecondary mt-1">
+                Required for communication and support
+              </p>
+            </div>
+
+            {/* Telegram Username Verification */}
+            <div className="mt-2">
+              {!verificationCode ? (
+                <button
+                  type="button"
+                  onClick={handleTelegramVerification}
+                  disabled={!formData.telegramUsername || isVerifying}
+                  className="px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent/90 transition-colors"
+                >
+                  {isVerifying ? "Generating Code..." : "Verify Telegram"}
+                </button>
+              ) : (
+                <div className="bg-secondary/30 rounded-lg p-4">
+                  <p className="text-sm text-textPrimary mb-2">
+                    Verification Code:{" "}
+                    <span className="font-mono">{verificationCode}</span>
+                  </p>
+                  <p className="text-xs text-textSecondary">
+                    1. Open Telegram and message{" "}
+                    <span className="font-mono">@premiumhaven_bot</span>
+                    <br />
+                    2. Send the command:{" "}
+                    <span className="font-mono">
+                      /verify {verificationCode}
+                    </span>
+                  </p>
+                  {isVerified && (
+                    <div className="mt-2 text-green-500 text-sm">
+                      ✓ Verified successfully!
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}

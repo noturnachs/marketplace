@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const telegramBotService = require("../services/telegramBotService");
 
 // Helper function to create and send token response
 const sendTokenResponse = (user, statusCode, res) => {
@@ -27,6 +28,7 @@ const sendTokenResponse = (user, statusCode, res) => {
       selling_experience: user.selling_experience,
       has_vouches: user.has_vouches,
       vouch_link: user.vouch_link,
+      telegram_username: user.telegram_username,
       created_at: user.created_at,
       last_login: user.last_login,
       seller_status: user.seller_status,
@@ -48,6 +50,7 @@ exports.register = async (req, res, next) => {
       sellingExperience,
       hasVouches,
       vouchLink,
+      telegramUsername,
     } = req.body;
 
     // Check if user already exists
@@ -69,6 +72,7 @@ exports.register = async (req, res, next) => {
       sellingExperience,
       hasVouches,
       vouchLink,
+      telegram_username: telegramUsername,
     });
 
     sendTokenResponse(user, 201, res);
@@ -139,5 +143,50 @@ exports.getMe = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.generateTelegramVerification = async (req, res) => {
+  try {
+    const { telegramUsername } = req.body;
+
+    if (!telegramUsername) {
+      return res.status(400).json({
+        success: false,
+        message: "Telegram username is required",
+      });
+    }
+
+    const code = await telegramBotService.generateVerificationCode(
+      telegramUsername
+    );
+
+    res.status(200).json({
+      success: true,
+      code,
+      botUsername: process.env.TELEGRAM_BOT_USERNAME,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error generating verification code",
+    });
+  }
+};
+
+exports.checkVerification = async (req, res) => {
+  try {
+    const { code } = req.body;
+    const isVerified = await telegramBotService.checkVerificationStatus(code);
+
+    res.status(200).json({
+      success: true,
+      verified: isVerified,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error checking verification status",
+    });
   }
 };

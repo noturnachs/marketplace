@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import DashboardNavbar from "../components/DashboardNavbar";
 import UserWallet from "./wallet/UserWallet";
@@ -7,7 +7,10 @@ import { purchaseService } from "../services/purchaseService";
 
 function ProfilePage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") || "overview"
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,6 +98,20 @@ function ProfilePage() {
     }
   };
 
+  // Update URL when tab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
+
+  // Set initial tab from URL on component mount
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["overview", "purchases", "wallet"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
   return (
     <div className="min-h-screen bg-primary">
       <DashboardNavbar />
@@ -141,7 +158,7 @@ function ProfilePage() {
             {tabs.map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab.toLowerCase())}
+                onClick={() => handleTabChange(tab.toLowerCase())}
                 className={`text-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab.toLowerCase()
                     ? "text-accent"
@@ -156,29 +173,29 @@ function ProfilePage() {
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="space-y-6">
-              {purchaseHistory.length === 0 ? (
-                <EmptyOverview />
-              ) : (
-                <div className="bg-secondary/30 rounded-lg p-6">
-                  <h2 className="text-lg font-semibold text-textPrimary mb-4">
-                    Account Overview
-                  </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-textSecondary">Email</p>
-                      <p className="text-sm text-textPrimary">
-                        {userData.email}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-textSecondary">Role</p>
-                      <p className="text-sm text-textPrimary capitalize">
-                        {userData.role}
-                      </p>
-                    </div>
+              <div className="bg-secondary/30 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-textPrimary mb-4">
+                  Account Overview
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-textSecondary">Email</p>
+                    <p className="text-sm text-textPrimary">{userData.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-textSecondary">Role</p>
+                    <p className="text-sm text-textPrimary capitalize">
+                      {userData.role}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-textSecondary">Telegram</p>
+                    <p className="text-sm text-textPrimary">
+                      @{userData.telegram_username}
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           )}
 

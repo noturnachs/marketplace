@@ -85,4 +85,38 @@ export const authService = {
       throw error;
     }
   },
+
+  generateTelegramVerification: async (telegramUsername) => {
+    const response = await fetch(`${API_URL}/telegram-verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ telegramUsername }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Telegram verification failed");
+    }
+
+    return data;
+  },
+
+  checkVerification: async (code) => {
+    const response = await fetch(`${API_URL}/telegram-verify/check`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Verification check failed");
+    }
+
+    return data;
+  },
 };

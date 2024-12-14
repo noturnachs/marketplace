@@ -48,6 +48,7 @@ class User {
       sellingExperience,
       hasVouches,
       vouchLink,
+      telegram_username,
     } = userData;
 
     // Hash password
@@ -55,8 +56,8 @@ class User {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const query = `
-      INSERT INTO users (username, email, password, role, account_types, selling_experience, has_vouches, vouch_link)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO users (username, email, password, role, account_types, selling_experience, has_vouches, vouch_link, telegram_username)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id, username, email, role
     `;
 
@@ -69,6 +70,7 @@ class User {
       sellingExperience || null,
       hasVouches || false,
       vouchLink || null,
+      telegram_username || null,
     ];
 
     try {

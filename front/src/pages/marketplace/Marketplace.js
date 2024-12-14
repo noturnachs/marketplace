@@ -174,9 +174,14 @@ function Marketplace() {
                   </p>
 
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-textSecondary">
-                      Seller: {listing.seller_name}
-                    </p>
+                    <div className="flex flex-col">
+                      <p className="text-xs text-textSecondary">
+                        Seller: {listing.seller_name}
+                      </p>
+                      <p className="text-xs text-textSecondary">
+                        @{listing.seller_telegram}
+                      </p>
+                    </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -191,6 +196,24 @@ function Marketplace() {
               );
             })}
           </div>
+
+          {/* Empty State */}
+          {filteredListings.length === 0 && (
+            <div className="text-center py-8">
+              <div className="bg-secondary/30 rounded-lg p-8">
+                <h3 className="text-lg font-medium text-textPrimary mb-2">
+                  No Listings Found
+                </h3>
+                <p className="text-sm text-textSecondary">
+                  {searchQuery
+                    ? "No listings match your search criteria. Try different keywords or clear the search."
+                    : selectedCategory !== "all"
+                    ? "No listings available in this category yet."
+                    : "There are no listings available at the moment."}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
