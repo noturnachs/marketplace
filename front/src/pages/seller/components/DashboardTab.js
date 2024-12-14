@@ -229,8 +229,7 @@ function DashboardTab() {
             </h3>
             <div className="space-y-2">
               <p className="text-sm text-textSecondary">
-                1. Open Telegram and search for @
-                {process.env.REACT_APP_TELEGRAM_BOT_USERNAME}
+                1. Open Telegram and search for @premiumhaven_bot
               </p>
               <p className="text-sm text-textSecondary">
                 2. Start a chat with the bot by clicking "Start" or sending any
