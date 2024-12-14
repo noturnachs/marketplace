@@ -61,6 +61,15 @@ class TelegramBotService {
   }
 
   async verifyCode(code, username) {
+    // First, clean up any expired codes for this username
+    await pool.query(
+      `DELETE FROM telegram_verifications 
+       WHERE telegram_username = $1 
+       AND expires_at < NOW()`,
+      [username]
+    );
+
+    // Then attempt verification
     const result = await pool.query(
       `UPDATE telegram_verifications 
        SET verified = TRUE 
@@ -72,7 +81,25 @@ class TelegramBotService {
       [code, username]
     );
 
-    return { success: result.rowCount > 0 };
+    // Check if this code exists but was already verified
+    if (result.rowCount === 0) {
+      const existingCode = await pool.query(
+        `SELECT verified 
+         FROM telegram_verifications 
+         WHERE code = $1 
+         AND telegram_username = $2`,
+        [code, username]
+      );
+
+      if (existingCode.rows[0]?.verified) {
+        return { success: false, message: "Code already used" };
+      }
+    }
+
+    return {
+      success: result.rowCount > 0,
+      message: result.rowCount > 0 ? "Verification successful" : "Invalid code",
+    };
   }
 
   async checkVerificationStatus(code) {
@@ -161,7 +188,9 @@ ${process.env.FRONTEND_URL}/dashboard?tab=seller
       } else {
         this.bot.sendMessage(
           chatId,
-          "❌ Invalid or expired verification code."
+          verification.message === "Code already used"
+            ? "❌ This code has already been used."
+            : "❌ Invalid or expired verification code."
         );
       }
     });
