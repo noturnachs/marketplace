@@ -48,47 +48,52 @@ class TelegramBotService {
   }
 
   async generateVerificationCode(telegramUsername) {
+    // Convert username to lowercase when generating code
+    const normalizedUsername = telegramUsername.toLowerCase();
     const code = crypto.randomBytes(3).toString("hex");
     const expiresAt = new Date(Date.now() + 600000); // 10 minutes from now
 
     await pool.query(
       `INSERT INTO telegram_verifications (code, telegram_username, expires_at)
        VALUES ($1, $2, $3)`,
-      [code, telegramUsername, expiresAt]
+      [code, normalizedUsername, expiresAt]
     );
 
     return code;
   }
 
   async verifyCode(code, username) {
+    // Convert username to lowercase for case-insensitive comparison
+    const normalizedUsername = username.toLowerCase();
+
     // First, clean up any expired codes for this username
     await pool.query(
       `DELETE FROM telegram_verifications 
-       WHERE telegram_username = $1 
+       WHERE LOWER(telegram_username) = LOWER($1) 
        AND expires_at < NOW()`,
-      [username]
+      [normalizedUsername]
     );
 
-    // Then attempt verification
+    // Then attempt verification with case-insensitive username comparison
     const result = await pool.query(
       `UPDATE telegram_verifications 
        SET verified = TRUE 
        WHERE code = $1 
-       AND telegram_username = $2 
+       AND LOWER(telegram_username) = LOWER($2) 
        AND expires_at > NOW()
        AND verified = FALSE
        RETURNING *`,
-      [code, username]
+      [code, normalizedUsername]
     );
 
-    // Check if this code exists but was already verified
+    // Check if this code exists but was already verified (case-insensitive)
     if (result.rowCount === 0) {
       const existingCode = await pool.query(
         `SELECT verified 
          FROM telegram_verifications 
          WHERE code = $1 
-         AND telegram_username = $2`,
-        [code, username]
+         AND LOWER(telegram_username) = LOWER($2)`,
+        [code, normalizedUsername]
       );
 
       if (existingCode.rows[0]?.verified) {
