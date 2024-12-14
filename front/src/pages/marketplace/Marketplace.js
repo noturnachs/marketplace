@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { listingService } from "../../services/listingService";
 import { categories, getCategoryByName } from "../../config/categories";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import debounce from "lodash/debounce";
 
 function Marketplace() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ function Marketplace() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
   useEffect(() => {
     fetchListings();
@@ -28,13 +30,33 @@ function Marketplace() {
     }
   };
 
+  const debouncedSetSearch = useCallback(
+    debounce((value) => {
+      setDebouncedSearchQuery(value);
+    }, 300),
+    []
+  );
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    debouncedSetSearch(e.target.value);
+  };
+
   const filteredListings = listings.filter((listing) => {
-    const matchesCategory =
-      selectedCategory === "all" || listing.category === selectedCategory;
-    const matchesSearch = listing.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    // If there's a search term, ignore category filter
+    const searchTerm = debouncedSearchQuery.toLowerCase().trim();
+    if (searchTerm) {
+      return (
+        listing.title.toLowerCase().includes(searchTerm) ||
+        listing.description.toLowerCase().includes(searchTerm) ||
+        listing.seller_name.toLowerCase().includes(searchTerm) ||
+        listing.category.toLowerCase().includes(searchTerm) ||
+        (listing.price && listing.price.toString().includes(searchTerm))
+      );
+    }
+
+    // If no search term, apply category filter only
+    return selectedCategory === "all" || listing.category === selectedCategory;
   });
 
   if (isLoading) return <LoadingSpinner />;
@@ -53,12 +75,27 @@ function Marketplace() {
         <div className="flex flex-col gap-6">
           {/* Search */}
           <div className="relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <svg
+                className="w-5 h-5 text-textSecondary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
             <input
               type="text"
               placeholder="Search listings..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-secondary/50 backdrop-blur-lg rounded-xl px-4 py-2 text-textPrimary placeholder:text-textSecondary focus:outline-none focus:ring-2 focus:ring-accent/50"
+              onChange={(e) => handleSearch(e)}
+              className="w-full bg-secondary/50 backdrop-blur-lg rounded-xl pl-10 pr-4 py-2 text-textPrimary placeholder:text-textSecondary focus:outline-none focus:ring-2 focus:ring-accent/50"
             />
           </div>
 
