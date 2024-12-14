@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect } = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const Seller = require("../models/Seller");
+const SellerBalance = require("../models/SellerBalance");
 
 // Get pending sellers
 router.get("/pending", protect, admin, async (req, res) => {
@@ -55,6 +56,15 @@ router.put("/:id/status", protect, admin, async (req, res) => {
       success: false,
       error: error.message || "Failed to update seller status",
     });
+  }
+});
+
+router.get("/balance", protect, async (req, res) => {
+  try {
+    const balance = await SellerBalance.getBalance(req.user.id);
+    res.json(balance);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

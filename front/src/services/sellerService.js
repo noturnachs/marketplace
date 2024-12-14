@@ -39,4 +39,18 @@ export const sellerService = {
     if (!response.ok) throw new Error(data.error);
     return data.data;
   },
+
+  getBalance: async () => {
+    const response = await fetch(`${API_URL}/sellers/balance`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch balance");
+    }
+
+    return response.json();
+  },
 };

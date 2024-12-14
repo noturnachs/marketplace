@@ -4,6 +4,7 @@ import { listingService } from "../../services/listingService";
 import { purchaseService } from "../../services/purchaseService";
 import { categories, getCategoryByName } from "../../config/categories";
 import SendAccountModal from "../../components/SendAccountModal";
+import { sellerService } from "../../services/sellerService";
 
 function SellerDashboard() {
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
@@ -30,11 +31,17 @@ function SellerDashboard() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isEditingTelegram, setIsEditingTelegram] = useState(false);
   const [newTelegramUsername, setNewTelegramUsername] = useState("");
+  const [balance, setBalance] = useState({
+    gross_sales: "0.00",
+    available_balance: "0.00",
+    total_fees: "0.00",
+  });
 
   useEffect(() => {
     if (sellerStatus === "verified") {
       fetchListings();
       fetchSales();
+      fetchBalance();
     }
   }, [sellerStatus]);
 
@@ -57,6 +64,15 @@ function SellerDashboard() {
       setTotalPendingSales(salesData.totalPendingSales);
     } catch (error) {
       console.error("Error fetching sales:", error);
+    }
+  };
+
+  const fetchBalance = async () => {
+    try {
+      const balanceData = await sellerService.getBalance();
+      setBalance(balanceData);
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -247,20 +263,20 @@ function SellerDashboard() {
                 Available Balance (After Fees)
               </p>
               <p className="text-2xl font-bold text-green-500">
-                ₱{(totalCompletedSales * 0.95).toFixed(2)}
+                ₱{parseFloat(balance.available_balance).toFixed(2)}
               </p>
               <p className="text-xs text-textSecondary mt-1">
-                5% platform fee applied per order
+                5% platform fee applied
               </p>
             </div>
 
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-sm text-textSecondary">Gross Sales</p>
               <p className="text-2xl font-bold text-accent">
-                ₱{totalCompletedSales.toFixed(2)}
+                ₱{parseFloat(balance.gross_sales).toFixed(2)}
               </p>
               <p className="text-xs text-textSecondary mt-1">
-                Before platform fees
+                Total fees: ₱{parseFloat(balance.total_fees).toFixed(2)}
               </p>
             </div>
 

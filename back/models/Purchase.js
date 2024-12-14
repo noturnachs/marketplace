@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 const telegramBotService = require("../services/telegramBotService");
+const SellerBalance = require("./SellerBalance");
 
 class Purchase {
   static async create({ listingId, buyerId, amount }) {
@@ -216,6 +217,9 @@ class Purchase {
           listing,
           buyer
         );
+
+        // Update seller balance
+        await SellerBalance.updateBalance(purchase.seller_id, purchase.amount);
       }
 
       await client.query("COMMIT");
