@@ -18,7 +18,7 @@ User: ${payment.username}
 Method: ${payment.payment_method}
 Reference: \`${payment.reference_id}\`
 
-[View Admin Dashboard](${process.env.FRONTEND_URL}/admin/dashboard)
+[View Admin Dashboard](${process.env.FRONTEND_URL}/admin)
     `;
 
     try {
@@ -41,7 +41,7 @@ Experience: ${seller.selling_experience}
 Has Vouches: ${seller.has_vouches ? "Yes" : "No"}
 ${seller.vouch_link ? `Vouch Link: ${seller.vouch_link}` : ""}
 
-[View Admin Dashboard](${process.env.FRONTEND_URL}/admin/dashboard?tab=sellers)
+[View Admin Dashboard](${process.env.FRONTEND_URL}/admin)
     `;
 
     try {
