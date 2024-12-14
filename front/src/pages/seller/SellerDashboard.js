@@ -274,10 +274,10 @@ function SellerDashboard() {
           <div className="bg-secondary/30 rounded-lg p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-textPrimary">
+                <h2 className="text-sm font-semibold text-textPrimary">
                   Telegram Notifications
                 </h2>
-                <p className="text-sm text-textSecondary mt-1">
+                <p className="text-xs text-textSecondary mt-1">
                   Get instant notifications for new orders via Telegram
                 </p>
               </div>
@@ -311,30 +311,30 @@ function SellerDashboard() {
               ) : (
                 <div className="space-y-4">
                   <div className="bg-secondary/50 rounded-lg p-4">
-                    <p className="text-sm text-textSecondary mb-2">
-                      Your Telegram Username
+                    <p className="text-xs text-textSecondary mb-2">
+                      Connected Account
                     </p>
-                    <p className="text-textPrimary font-medium">
+                    <p className="text-textPrimary font-medium text-xs">
                       @{userData.telegram_username}
                     </p>
                   </div>
 
                   <div className="bg-secondary/50 rounded-lg p-4">
-                    <p className="text-sm text-textSecondary mb-2">
+                    <p className="text-xs text-textSecondary mb-2">
                       Connect with our Bot
                     </p>
                     <div className="space-y-2">
-                      <p className="text-sm text-textPrimary">
+                      <p className="text-xs text-textPrimary">
                         1. Open Telegram and search for{" "}
                         <span className="font-mono">
                           @{process.env.REACT_APP_TELEGRAM_BOT_USERNAME}
                         </span>
                       </p>
-                      <p className="text-sm text-textPrimary">
+                      <p className="text-xs text-textPrimary">
                         2. Start a chat with the bot by clicking "Start" or
                         sending any message
                       </p>
-                      <p className="text-sm text-textPrimary">
+                      <p className="text-xs text-textPrimary">
                         3. You'll receive instant notifications for new orders
                       </p>
                     </div>
@@ -344,7 +344,7 @@ function SellerDashboard() {
                     onClick={() => {
                       /* Add function to update Telegram username */
                     }}
-                    className="text-accent hover:text-accent/80 transition-colors text-sm"
+                    className="text-accent hover:text-accent/80 transition-colors text-xs"
                   >
                     Update Telegram Username
                   </button>

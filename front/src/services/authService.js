@@ -119,4 +119,28 @@ export const authService = {
 
     return data;
   },
+
+  updateTelegramUsername: async (telegramUsername) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/update-telegram`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ telegram_username: telegramUsername }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update Telegram username");
+    }
+
+    // Update local storage
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    userData.telegram_username = telegramUsername;
+    localStorage.setItem("userData", JSON.stringify(userData));
+
+    return data;
+  },
 };

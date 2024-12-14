@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import DashboardNavbar from "../components/DashboardNavbar";
 import UserWallet from "./wallet/UserWallet";
 import { purchaseService } from "../services/purchaseService";
+import { authService } from "../services/authService";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [countdowns, setCountdowns] = useState({});
+  const [isEditingTelegram, setIsEditingTelegram] = useState(false);
+  const [newTelegramUsername, setNewTelegramUsername] = useState("");
 
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
 
@@ -112,6 +115,26 @@ function ProfilePage() {
     }
   }, [searchParams]);
 
+  const handleUpdateTelegramUsername = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      await authService.updateTelegramUsername(newTelegramUsername);
+
+      // Force re-render by updating state
+      setIsEditingTelegram(false);
+      setNewTelegramUsername("");
+
+      // Optional: Show success message
+      // You might want to add a toast notification here
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-primary">
       <DashboardNavbar />
@@ -152,6 +175,110 @@ function ProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Telegram Section */}
+          <div className="bg-secondary/30 rounded-lg p-6 mb-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-textPrimary">
+                  Telegram Notifications
+                </h2>
+                <p className="text-xs text-textSecondary mt-1">
+                  Connect your Telegram account to receive instant notifications
+                </p>
+              </div>
+              {userData.telegram_username && (
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-green-500">Connected</span>
+                </div>
+              )}
+            </div>
+
+            {!userData.telegram_username ? (
+              <button
+                onClick={() => setIsEditingTelegram(true)}
+                className="mt-4 px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent/90 transition-colors"
+              >
+                Connect Telegram
+              </button>
+            ) : (
+              <div className="mt-4 space-y-4">
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <p className="text-xs text-textSecondary">
+                    Connected Account
+                  </p>
+                  <p className="text-textPrimary font-medium text-xs">
+                    @{userData.telegram_username}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsEditingTelegram(true)}
+                  className="text-accent hover:text-accent/80 transition-colors text-xs"
+                >
+                  Update Username
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Telegram Edit Modal */}
+          {isEditingTelegram && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-secondary rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 className="text-lg font-semibold text-textPrimary mb-4">
+                  {userData.telegram_username ? "Update" : "Add"} Telegram
+                  Username
+                </h3>
+
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-red-500">{error}</p>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={newTelegramUsername}
+                    onChange={(e) => setNewTelegramUsername(e.target.value)}
+                    placeholder="Enter your Telegram username"
+                    className="w-full bg-secondary/50 rounded-lg px-4 py-2 text-textPrimary"
+                  />
+
+                  <div className="bg-secondary/50 rounded-lg p-3">
+                    <p className="text-sm text-textSecondary">
+                      After connecting, start a chat with our bot{" "}
+                      <span className="font-mono">
+                        @{process.env.REACT_APP_TELEGRAM_BOT_USERNAME}
+                      </span>{" "}
+                      to receive notifications.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <button
+                    onClick={() => {
+                      setIsEditingTelegram(false);
+                      setError(null);
+                    }}
+                    className="px-4 py-2 bg-secondary/50 text-textSecondary rounded-lg text-sm hover:text-textPrimary transition-colors"
+                    disabled={isLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUpdateTelegramUsername}
+                    className="px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent/90 transition-colors"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Profile Tabs */}
           <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
@@ -196,6 +323,23 @@ function ProfilePage() {
                   </div>
                 </div>
               </div>
+              {!userData.telegram_username && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-4">
+                  <h3 className="text-yellow-500 font-medium mb-1">
+                    Set Up Telegram Notifications
+                  </h3>
+                  <p className="text-sm text-yellow-500/80">
+                    Add your Telegram username to receive instant notifications
+                    when sellers send your account details.
+                  </p>
+                  <button
+                    onClick={() => setIsEditingTelegram(true)}
+                    className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-500/90 transition-colors"
+                  >
+                    Add Telegram Username
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

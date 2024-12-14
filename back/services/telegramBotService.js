@@ -183,6 +183,44 @@ ${process.env.FRONTEND_URL}/dashboard?tab=seller
       }
     });
   }
+
+  async notifyBuyerOfAccount(purchase, listing, buyer) {
+    try {
+      // Get buyer's telegram username
+      const { rows } = await pool.query(
+        "SELECT telegram_username FROM users WHERE id = $1",
+        [buyer.id]
+      );
+
+      const buyerTelegram = rows[0]?.telegram_username;
+      if (!buyerTelegram) {
+        console.error("No telegram username found for buyer");
+        return;
+      }
+
+      // Format the message
+      const message = `
+🎉 Account Details Received!
+
+Product: ${listing.title}
+Seller: ${listing.seller_name}
+Price Paid: ₱${purchase.amount}
+
+Your account details are ready! Please log in to view them:
+${process.env.FRONTEND_URL}/profile
+
+⚠️ Important: Please confirm receipt within 24 hours.
+      `;
+
+      // Find chat ID for the buyer
+      const chatId = await this.findChatIdByUsername(buyerTelegram);
+      if (chatId) {
+        await this.bot.sendMessage(chatId, message, { parse_mode: "HTML" });
+      }
+    } catch (error) {
+      console.error("Error sending buyer notification:", error);
+    }
+  }
 }
 
 module.exports = new TelegramBotService();

@@ -163,30 +163,32 @@ class Purchase {
     try {
       await client.query("BEGIN");
 
-      // Get purchase details first
+      // Get purchase details with buyer and listing info
       const purchaseResult = await client.query(
-        `SELECT p.*, l.seller_id 
+        `SELECT 
+          p.*,
+          l.title as listing_title,
+          l.seller_id,
+          u.id as buyer_id,
+          u.username as buyer_username,
+          u.telegram_username as buyer_telegram,
+          s.username as seller_name,
+          s.telegram_username as seller_telegram
          FROM purchases p
          JOIN listings l ON p.listing_id = l.id
+         JOIN users u ON p.buyer_id = u.id
+         JOIN users s ON l.seller_id = s.id
          WHERE p.id = $1`,
         [id]
       );
-      const purchase = purchaseResult.rows[0];
 
+      const purchase = purchaseResult.rows[0];
       if (!purchase) {
         throw new Error("Purchase not found");
       }
 
-      if (status === "cancelled") {
-        // Refund buyer if cancelling
-        await client.query(
-          "UPDATE wallets SET coins = coins + $1 WHERE user_id = $2",
-          [purchase.amount, purchase.buyer_id]
-        );
-      }
-
-      // Update purchase status (but don't transfer coins yet)
-      const updateResult = await client.query(
+      // Update purchase status and account details
+      const result = await client.query(
         `UPDATE purchases 
          SET status = $1, account_details = $2
          WHERE id = $3
@@ -194,8 +196,30 @@ class Purchase {
         [status, account_details, id]
       );
 
+      // If status is completed (seller sent account details), notify buyer
+      if (status === "completed") {
+        const listing = {
+          title: purchase.listing_title,
+          seller_name: purchase.seller_name,
+        };
+
+        const buyer = {
+          id: purchase.buyer_id,
+          username: purchase.buyer_username,
+          telegram_username: purchase.buyer_telegram,
+        };
+
+        // Import and use telegramBotService
+        const telegramBotService = require("../services/telegramBotService");
+        await telegramBotService.notifyBuyerOfAccount(
+          result.rows[0],
+          listing,
+          buyer
+        );
+      }
+
       await client.query("COMMIT");
-      return updateResult.rows[0];
+      return result.rows[0];
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
