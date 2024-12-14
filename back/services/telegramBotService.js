@@ -255,6 +255,57 @@ ${process.env.FRONTEND_URL}/profile
       console.error("Error sending buyer notification:", error);
     }
   }
+
+  async notifySellerOfVerification(sellerId, status) {
+    try {
+      // Get seller's telegram username from the database
+      const { rows } = await pool.query(
+        "SELECT telegram_username, username FROM users WHERE id = $1",
+        [sellerId]
+      );
+
+      const seller = rows[0];
+      if (!seller?.telegram_username) {
+        console.error("No telegram username found for seller");
+        return;
+      }
+
+      // Format the message based on status
+      const message =
+        status === "verified"
+          ? `
+🎉 Congratulations ${seller.username}!
+
+Your seller account has been verified. You can now:
+• Create listings
+• Sell accounts
+• Receive payments
+
+Start selling now:
+${process.env.FRONTEND_URL}/dashboard?tab=seller
+        `
+          : `
+❌ Account Update
+
+Dear ${seller.username},
+
+Your seller account verification was not approved. This might be due to:
+• Insufficient selling experience
+• Missing or invalid vouches
+• Incomplete information
+
+Please contact support for more information.
+        `;
+
+      // Find chat ID for the seller
+      const chatId = await this.findChatIdByUsername(seller.telegram_username);
+      if (chatId) {
+        await this.bot.sendMessage(chatId, message, { parse_mode: "HTML" });
+      }
+    } catch (error) {
+      console.error("Error sending verification notification:", error);
+    }
+  }
 }
 
 module.exports = new TelegramBotService();

@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const TelegramBotService = require("../services/telegramBotService");
 
 class Seller {
   static async getPendingSellers() {
@@ -84,6 +85,8 @@ class Seller {
     if (rows.length === 0) {
       throw new Error("Seller not found");
     }
+
+    await TelegramBotService.notifySellerOfVerification(id, status);
 
     return rows[0];
   }

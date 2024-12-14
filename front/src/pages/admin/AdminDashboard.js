@@ -91,8 +91,13 @@ function AdminDashboard() {
 
   const handleSellerVerification = async (sellerId, status) => {
     try {
+      // Update seller status - notification will be sent automatically from backend
       await sellerService.updateStatus(sellerId, status);
+
+      // Refresh the sellers list
       await fetchSellers();
+
+      // Show success message
       alert(`Seller ${status} successfully`);
     } catch (error) {
       console.error("Error updating seller status:", error);
