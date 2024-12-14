@@ -326,7 +326,7 @@ function SellerDashboard() {
                   </p>
                   <div className="flex flex-col gap-2">
                     <a
-                      href="https://t.me/rizebaby01"
+                      href="https://t.me/Gxngzxxr"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
@@ -339,10 +339,10 @@ function SellerDashboard() {
                       >
                         <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.716-3.818 15.515-3.818 15.515-.121.487-.477.645-.773.645-.418 0-.706-.268-.944-.511l-4.033-3.458-1.591 1.434c-.122.098-.244.146-.366.146-.245 0-.489-.171-.489-.416v-4.584l7.142-6.689c.198-.183.198-.549-.122-.549-.074 0-.171.024-.269.098l-8.733 5.555-3.624-1.263c-.489-.171-.538-.549-.05-.818l14.909-5.825c.416-.171.806.122.806.549 0 .073-.025.171-.049.171z" />
                       </svg>
-                      <span className="text-sm">@rizebaby01</span>
+                      <span className="text-sm">@Gxngzxxr</span>
                     </a>
                     <a
-                      href="https://t.me/grim1232"
+                      href="https://t.me/ppprtts"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
@@ -355,7 +355,7 @@ function SellerDashboard() {
                       >
                         <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.716-3.818 15.515-3.818 15.515-.121.487-.477.645-.773.645-.418 0-.706-.268-.944-.511l-4.033-3.458-1.591 1.434c-.122.098-.244.146-.366.146-.245 0-.489-.171-.489-.416v-4.584l7.142-6.689c.198-.183.198-.549-.122-.549-.074 0-.171.024-.269.098l-8.733 5.555-3.624-1.263c-.489-.171-.538-.549-.05-.818l14.909-5.825c.416-.171.806.122.806.549 0 .073-.025.171-.049.171z" />
                       </svg>
-                      <span className="text-sm">@grim1232</span>
+                      <span className="text-sm">@ppprtts</span>
                     </a>
                   </div>
                 </div>

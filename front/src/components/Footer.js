@@ -32,20 +32,20 @@ function Footer() {
             <p className="text-textSecondary text-sm">Contact Admins:</p>
             <div className="flex gap-4 justify-center">
               <a
-                href="https://t.me/rizebaby01"
+                href="https://t.me/Gxngzxxr"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-secondary/50 rounded-lg text-textSecondary hover:text-accent transition-colors text-sm"
               >
-                @rizebaby01
+                @Gxngzxxr
               </a>
               <a
-                href="https://t.me/grim1232"
+                href="https://t.me/ppprtts"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-secondary/50 rounded-lg text-textSecondary hover:text-accent transition-colors text-sm"
               >
-                @grim1232
+                @ppprtts
               </a>
             </div>
           </div>
