@@ -40,7 +40,7 @@ function ProfilePage() {
     });
   };
 
-  const tabs = ["Overview", "Purchases", "Wallet", "Settings"];
+  const tabs = ["Overview", "Purchases", "Wallet"];
 
   // Empty state components
   const EmptyOverview = () => (
@@ -306,7 +306,7 @@ function ProfilePage() {
           {activeTab === "wallet" && <UserWallet />}
 
           {/* Settings Tab */}
-          {activeTab === "settings" && (
+          {/* {activeTab === "settings" && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold text-textPrimary mb-4">
@@ -340,7 +340,7 @@ function ProfilePage() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </motion.div>
       </main>
     </div>
