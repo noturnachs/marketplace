@@ -304,18 +304,13 @@ function SellerDashboard() {
                                 : "Completed (Awaiting Buyer Confirmation)"}
                             </p>
                           </div>
-                          <div className="text-sm">
-                            <p className="text-textSecondary mb-1">
-                              Sent Account Details:
+                          <div className="mt-2 bg-secondary/30 rounded-lg p-3">
+                            <p className="text-sm text-textSecondary mb-1">
+                              Account Details:
                             </p>
-                            <p className="text-textPrimary bg-secondary/30 p-2 rounded-lg font-mono whitespace-pre-wrap">
+                            <p className="text-sm text-textPrimary font-mono whitespace-pre-wrap break-words max-w-[500px]">
                               {sale.account_details}
                             </p>
-                            {!sale.is_confirmed && (
-                              <p className="text-yellow-500 text-sm mt-2">
-                                Waiting for buyer to confirm the account details
-                              </p>
-                            )}
                           </div>
                         </>
                       ) : (

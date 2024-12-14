@@ -242,7 +242,7 @@ function ProfilePage() {
                                   : "Account Received - Pending Confirmation"}
                               </p>
                             </div>
-                            <p className="text-textPrimary bg-secondary/50 p-2 rounded-lg font-mono whitespace-pre-wrap">
+                            <p className="text-textPrimary bg-secondary/50 p-2 rounded-lg font-mono whitespace-pre-wrap break-words max-w-[500px]">
                               {purchase.account_details}
                             </p>
                             {!purchase.is_confirmed ? (
@@ -266,7 +266,7 @@ function ProfilePage() {
                                 >
                                   {isLoading
                                     ? "Confirming..."
-                                    : "Confirm Account Receipt"}
+                                    : "Confirm Account"}
                                 </button>
                               </div>
                             ) : (
