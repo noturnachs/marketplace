@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const adminNotificationService = require("../services/adminNotificationService");
 
 const createPaymentsTable = async () => {
   const createTableQuery = `
@@ -46,6 +47,16 @@ class Payment {
 
     // Convert amount back to decimal for response
     const payment = rows[0];
+
+    // After successfully creating the payment
+    await adminNotificationService.notifyNewCashIn({
+      amount: payment.amount,
+      coins: payment.coins,
+      username: payment.username,
+      payment_method: payment.payment_method,
+      reference_id: payment.reference_id,
+    });
+
     return {
       ...payment,
       amount: payment.amount / 100,

@@ -1,6 +1,7 @@
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const adminNotificationService = require("../services/adminNotificationService");
 
 const createUsersTable = async () => {
   const createTableQuery = `
@@ -75,6 +76,18 @@ class User {
 
     try {
       const { rows } = await pool.query(query, values);
+
+      // If the user is registering as a seller, notify admins
+      if (role === "seller") {
+        await adminNotificationService.notifyNewSeller({
+          username: username,
+          account_types: accountTypes || [],
+          selling_experience: sellingExperience,
+          has_vouches: hasVouches,
+          vouch_link: vouchLink,
+        });
+      }
+
       return rows[0];
     } catch (error) {
       throw error;
