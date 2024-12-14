@@ -33,8 +33,8 @@ function LandingPage() {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-textPrimary tracking-tight leading-tight">
-            Your Trusted Digital
-            <span className="text-accent block mt-2">Account Marketplace</span>
+            Your Trusted{" "}
+            <span className="text-accent block mt-2">Premium Marketplace</span>
           </h1>
           <p className="text-base sm:text-lg text-textSecondary max-w-2xl mx-auto leading-relaxed">
             Buy and sell digital accounts securely. We provide a safe platform
@@ -51,7 +51,7 @@ function LandingPage() {
         </motion.div>
 
         {/* Stats Section */}
-        <motion.div
+        {/* <motion.div
           variants={stagger}
           initial="initial"
           whileInView="whileInView"
@@ -73,7 +73,7 @@ function LandingPage() {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </motion.div> */}
 
         {/* How it Works */}
         <motion.div
@@ -101,13 +101,13 @@ function LandingPage() {
               },
               {
                 step: "02",
-                title: "Browse Listings",
-                desc: "Find the perfect account from verified sellers.",
+                title: "Cash In",
+                desc: "Add funds to your wallet via GCash.",
               },
               {
                 step: "03",
-                title: "Secure Purchase",
-                desc: "Buy safely with our escrow system.",
+                title: "Buy Accounts",
+                desc: "Purchase premium accounts from verified sellers.",
               },
             ].map((item, i) => (
               <div key={i} className="relative">
@@ -135,11 +135,7 @@ function LandingPage() {
             {
               title: "Secure Transactions",
               desc: "Protected payments and verified sellers for your peace of mind.",
-              features: [
-                "Escrow Protection",
-                "Identity Verification",
-                "Secure Payments",
-              ],
+              features: ["Identity Verification", "Secure Payments"],
             },
             {
               title: "Wide Selection",
@@ -149,7 +145,7 @@ function LandingPage() {
             {
               title: "24/7 Support",
               desc: "Our team is always here to help with any issues or questions.",
-              features: ["Live Chat", "Email Support", "Help Center"],
+              features: ["Telegram Support"],
             },
           ].map((feature, i) => (
             <div
@@ -178,7 +174,7 @@ function LandingPage() {
         </motion.div>
 
         {/* Verified Sellers Section */}
-        <motion.div
+        {/* <motion.div
           className="mt-24 sm:mt-32"
           variants={fadeInUp}
           initial="initial"
@@ -288,7 +284,7 @@ function LandingPage() {
               </div>
             ))}
           </motion.div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Testimonials */}
         <motion.div
@@ -316,8 +312,7 @@ function LandingPage() {
                 role: "Verified Buyer",
               },
               {
-                quote:
-                  "Made selling my accounts so easy. The escrow system gives peace of mind to both parties.",
+                quote: "Made selling my accounts so easy.",
                 author: "Sarah K.",
                 role: "Verified Seller",
               },
