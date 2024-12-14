@@ -139,15 +139,15 @@ function ProfilePage() {
     <div className="min-h-screen bg-primary">
       <DashboardNavbar />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-4 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Profile Header with Stats */}
-          <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 mb-6">
-            <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-4 sm:p-6 mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
               <div>
                 <h1 className="text-xl font-bold text-textPrimary mb-2">
                   {userData.username}
@@ -156,15 +156,15 @@ function ProfilePage() {
                   Member since {formatJoinDate(userData.created_at)}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-accent">
+              <div className="grid grid-cols-2 gap-4 w-full sm:w-auto">
+                <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-accent">
                     {purchaseHistory.length}
                   </p>
                   <p className="text-xs text-textSecondary">Total Purchases</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-accent">
+                <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-accent">
                     ₱
                     {purchaseHistory
                       .reduce((sum, p) => sum + parseFloat(p.amount), 0)
@@ -184,7 +184,7 @@ function ProfilePage() {
                   Telegram Notifications
                 </h2>
                 <p className="text-xs text-textSecondary mt-1">
-                  Connect your Telegram account to receive instant notifications
+                  Connect your Telegram account
                 </p>
               </div>
               {userData.telegram_username && (
@@ -224,8 +224,8 @@ function ProfilePage() {
 
           {/* Telegram Edit Modal */}
           {isEditingTelegram && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-secondary rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-secondary rounded-lg p-4 sm:p-6 w-full max-w-md">
                 <h3 className="text-lg font-semibold text-textPrimary mb-4">
                   {userData.telegram_username ? "Update" : "Add"} Telegram
                   Username
@@ -281,14 +281,14 @@ function ProfilePage() {
           )}
 
           {/* Profile Tabs */}
-          <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
+          <div className="flex gap-4 mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => handleTabChange(tab.toLowerCase())}
-                className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                className={`text-sm font-medium transition-colors whitespace-nowrap px-2 py-1 ${
                   activeTab === tab.toLowerCase()
-                    ? "text-accent"
+                    ? "text-accent border-b-2 border-accent"
                     : "text-textSecondary hover:text-textPrimary"
                 }`}
               >
@@ -358,7 +358,7 @@ function ProfilePage() {
                     key={purchase.id}
                     className="bg-secondary/30 rounded-lg p-4"
                   >
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-2">
                       <div>
                         <h3 className="text-sm font-medium text-textPrimary">
                           {purchase.listing_title}
@@ -368,7 +368,7 @@ function ProfilePage() {
                           {new Date(purchase.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className="text-accent font-medium">
+                      <span className="text-accent font-medium order-first sm:order-last">
                         ₱{parseFloat(purchase.amount).toFixed(2)}
                       </span>
                     </div>

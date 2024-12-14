@@ -266,7 +266,7 @@ function SellerDashboard() {
                 ₱{parseFloat(balance.available_balance).toFixed(2)}
               </p>
               <p className="text-xs text-textSecondary mt-1">
-                5% platform fee applied
+                5% fee per order
               </p>
             </div>
 
