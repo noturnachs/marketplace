@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { authService } from "../services/authService";
+import TermsModal from "../components/TermsModal";
 
 function SignupPage() {
   const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ function SignupPage() {
   const [verificationCode, setVerificationCode] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -486,13 +488,19 @@ function SignupPage() {
             {/* Terms */}
             <p className="text-xs text-textSecondary text-center">
               By signing up, you agree to our{" "}
-              <a href="#terms" className="text-accent hover:text-accent/80">
+              <button
+                onClick={() => setIsTermsOpen(true)}
+                className="text-accent hover:text-accent/80"
+              >
                 Terms
-              </a>{" "}
+              </button>{" "}
               and{" "}
-              <a href="#privacy" className="text-accent hover:text-accent/80">
+              <button
+                onClick={() => setIsTermsOpen(true)}
+                className="text-accent hover:text-accent/80"
+              >
                 Privacy Policy
-              </a>
+              </button>
             </p>
           </form>
 
@@ -510,6 +518,8 @@ function SignupPage() {
           </div>
         </div>
       </motion.div>
+
+      <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
     </div>
   );
 }
