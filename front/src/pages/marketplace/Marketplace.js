@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { listingService } from "../../services/listingService";
 import { categories, getCategoryByName } from "../../config/categories";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -176,9 +176,13 @@ function Marketplace() {
 
                   <div className="flex justify-between items-center">
                     <div className="flex flex-col">
-                      <p className="text-xs text-blue-500">
+                      <Link
+                        to={`/seller/${listing.seller_id}/profile`}
+                        className="text-xs text-blue-500 hover:text-blue-400 transition-colors cursor-pointer"
+                        onClick={(e) => e.stopPropagation()} // Add this to prevent triggering the parent onClick
+                      >
                         {listing.seller_name}
-                      </p>
+                      </Link>
                       <p className="text-xs text-[#22c55e]">
                         @{listing.seller_telegram}
                       </p>

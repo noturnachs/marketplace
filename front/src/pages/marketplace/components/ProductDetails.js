@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { listingService } from "../../../services/listingService";
 import { purchaseService } from "../../../services/purchaseService";
@@ -33,7 +33,7 @@ function ProductDetails() {
       setListing(data);
 
       if (data.seller_id) {
-        const sellerData = await sellerService.getSellerDetails(data.seller_id);
+        const sellerData = await sellerService.getSellerProfile(data.seller_id);
         setSellerDetails(sellerData);
       }
     } catch (error) {
@@ -153,9 +153,12 @@ function ProductDetails() {
                     Seller
                   </h3>
                   <div className="space-y-1">
-                    <p className="text-sm text-blue-500">
+                    <Link
+                      to={`/seller/${listing.seller_id}/profile`}
+                      className="text-sm text-blue-500 hover:text-blue-400 transition-colors"
+                    >
                       {listing.seller_name}
-                    </p>
+                    </Link>
                     <p className="text-xs text-[#22c55e]">
                       Telegram: @{listing.seller_telegram}
                     </p>

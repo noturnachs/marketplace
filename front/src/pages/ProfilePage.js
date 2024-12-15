@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import DashboardNavbar from "../components/DashboardNavbar";
 import UserWallet from "./wallet/UserWallet";
@@ -364,8 +364,14 @@ function ProfilePage() {
                           {purchase.listing_title}
                         </h3>
                         <p className="text-xs text-textSecondary">
-                          Sold by {purchase.seller_name} •{" "}
-                          {new Date(purchase.created_at).toLocaleDateString()}
+                          Sold by{" "}
+                          <Link
+                            to={`/seller/${purchase.seller_id}`}
+                            className="text-accent hover:text-accent/80 transition-colors"
+                          >
+                            {purchase.seller_name}
+                          </Link>{" "}
+                          • {new Date(purchase.created_at).toLocaleDateString()}
                         </p>
                       </div>
                       <span className="text-accent font-medium order-first sm:order-last">

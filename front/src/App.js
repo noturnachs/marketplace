@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductDetails from "./pages/marketplace/components/ProductDetails";
+import SellerProfile from "./pages/seller/SellerProfile";
 
 function App() {
   return (
@@ -68,6 +69,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ProductDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/:sellerId/profile"
+          element={
+            <ProtectedRoute>
+              <SellerProfile />
             </ProtectedRoute>
           }
         />

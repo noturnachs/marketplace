@@ -133,4 +133,26 @@ export const sellerService = {
 
     return data.feeExempt;
   },
+
+  getSellerProfile: async (sellerId) => {
+    const response = await fetch(`${API_URL}/sellers/${sellerId}/profile`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
+
+  getSellerListings: async (sellerId) => {
+    const response = await fetch(`${API_URL}/sellers/${sellerId}/listings`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
 };
