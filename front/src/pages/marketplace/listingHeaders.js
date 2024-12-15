@@ -26,6 +26,7 @@ import valorantHeader from "./assets/headers/valorant.png";
 import vyprvpnHeader from "./assets/headers/vyprvpn.png";
 import nordvpnHeader from "./assets/headers/nordvpn.png";
 import viuHeader from "./assets/headers/viu.png";
+import reminderHeader from "./assets/headers/reminder.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -73,6 +74,11 @@ export const listingHeaders = [
     keyword: "spotify",
     image: spotifyHeader,
     alt: "Spotify Header",
+  },
+  {
+    keyword: "reminder",
+    image: reminderHeader,
+    alt: "Reminder Header",
   },
   {
     keyword: "capcut",
