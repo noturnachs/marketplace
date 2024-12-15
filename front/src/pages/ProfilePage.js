@@ -6,6 +6,21 @@ import UserWallet from "./wallet/UserWallet";
 import { purchaseService } from "../services/purchaseService";
 import { authService } from "../services/authService";
 import { sellerService } from "../services/sellerService";
+import ColorCustomizer from "../components/ColorCustomizer";
+
+function darkenHexColor(hex, amount) {
+  hex = hex.replace(/^#/, "");
+
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+
+  r = Math.max(0, r - amount);
+  g = Math.max(0, g - amount);
+  b = Math.max(0, b - amount);
+
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -17,11 +32,12 @@ function ProfilePage() {
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [countdowns, setCountdowns] = useState({});
   const [isEditingTelegram, setIsEditingTelegram] = useState(false);
   const [newTelegramUsername, setNewTelegramUsername] = useState("");
   const [seller, setSeller] = useState(null);
   const [listings, setListings] = useState([]);
+  const [isSellerLoading, setIsSellerLoading] = useState(true);
+  const [colorCustomization, setColorCustomization] = useState(null);
 
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
 
@@ -53,25 +69,6 @@ function ProfilePage() {
   };
 
   // Empty state components
-  const EmptyOverview = () => (
-    <div className="text-center py-8">
-      <div className="bg-secondary/30 rounded-lg p-8">
-        <h3 className="text-lg font-medium text-textPrimary mb-2">
-          Welcome to PremiumHaven!
-        </h3>
-        <p className="text-sm text-textSecondary">
-          Start exploring our marketplace to find premium subscriptions at great
-          prices.
-        </p>
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="mt-4 px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent/90 transition-colors"
-        >
-          Browse Marketplace
-        </button>
-      </div>
-    </div>
-  );
 
   const EmptyPurchases = () => (
     <div className="text-center py-8">
@@ -119,6 +116,10 @@ function ProfilePage() {
     }
   }, [searchParams]);
 
+  const handleListingClick = (listingId) => {
+    navigate(`/marketplace/${listingId}`);
+  };
+
   const handleUpdateTelegramUsername = async () => {
     try {
       setIsLoading(true);
@@ -139,26 +140,37 @@ function ProfilePage() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const userId = userData.id; // Get the current user's ID
-        const [profileData, listingsData] = await Promise.all([
-          sellerService.getSellerProfile(userId),
-          sellerService.getSellerListings(userId),
-        ]);
-        setSeller(profileData);
-        setListings(listingsData);
-      } catch (error) {
-        setError(error.message || "Failed to load profile data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      setIsSellerLoading(true);
+      const userId = userData.id;
+      const [profileData, listingsData, customizationData] = await Promise.all([
+        sellerService.getSellerProfile(userId),
+        sellerService.getSellerListings(userId),
+        sellerService.getProfileCustomization(userId),
+      ]);
+      setSeller({
+        ...profileData,
+        primary_color: customizationData?.primary_color || "#17222e",
+        secondary_color: customizationData?.secondary_color || "#182531",
+        accent_color: customizationData?.accent_color || "#6366F1",
+      });
+      setListings(listingsData);
+      setColorCustomization(customizationData);
+    } catch (error) {
+      setError(error.message || "Failed to load profile data");
+    } finally {
+      setIsSellerLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [userData.id]);
+
+  const handleColorSave = () => {
+    fetchData();
+  };
 
   return (
     <div className="min-h-screen bg-primary">
@@ -387,82 +399,186 @@ function ProfilePage() {
           )}
 
           {/* Seller Profile Tab */}
-          {activeTab === "seller profile" && (
-            <div className="space-y-6">
+          {activeTab === "seller profile" && !isSellerLoading && (
+            <div
+              className="space-y-6 rounded-lg px-4 py-8"
+              style={{ backgroundColor: seller?.primary_color }}
+            >
               {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-secondary/30 rounded-lg p-6 text-center">
-                  <p className="text-3xl font-bold text-accent">
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div
+                  className="rounded-lg p-6 text-center transition-all duration-200"
+                  style={{ backgroundColor: seller?.secondary_color }}
+                >
+                  <p
+                    className="text-4xl font-bold mb-1"
+                    style={{
+                      color: darkenHexColor(
+                        seller?.accent_color || "#000000",
+                        100
+                      ),
+                    }}
+                  >
                     {listings?.length || 0}
                   </p>
-                  <p className="text-sm text-textSecondary mt-1">
+                  <p
+                    className="text-sm font-bold"
+                    style={{
+                      color: darkenHexColor(
+                        seller?.accent_color || "#000000",
+                        -20
+                      ),
+                    }}
+                  >
                     Total Listings
                   </p>
                 </div>
-                <div className="bg-secondary/30 rounded-lg p-6 text-center">
-                  <p className="text-3xl font-bold text-accent">
+                <div
+                  className="rounded-lg p-6 text-center transition-all duration-200"
+                  style={{ backgroundColor: seller?.secondary_color }}
+                >
+                  <p
+                    className="text-4xl font-bold mb-1"
+                    style={{
+                      color: darkenHexColor(
+                        seller?.accent_color || "#000000",
+                        100
+                      ),
+                    }}
+                  >
                     {seller?.vouches || 0}
                   </p>
-                  <p className="text-sm text-textSecondary mt-1">Vouches</p>
+                  <p
+                    className="text-sm font-bold"
+                    style={{
+                      color: darkenHexColor(
+                        seller?.accent_color || "#000000",
+                        -20
+                      ),
+                    }}
+                  >
+                    Vouches
+                  </p>
                 </div>
-                <div className="bg-secondary/30 rounded-lg p-6 text-center">
-                  <p className="text-3xl font-bold text-accent">
+                <div
+                  className="rounded-lg p-6 text-center transition-all duration-200"
+                  style={{ backgroundColor: seller?.secondary_color }}
+                >
+                  <p
+                    className="text-4xl font-bold mb-1"
+                    style={{
+                      color: darkenHexColor(
+                        seller?.accent_color || "#000000",
+                        100
+                      ),
+                    }}
+                  >
                     {seller?.account_types?.length || 0}
                   </p>
-                  <p className="text-sm text-textSecondary mt-1">
+                  <p
+                    className="text-sm font-bold"
+                    style={{
+                      color: darkenHexColor(
+                        seller?.accent_color || "#000000",
+                        -20
+                      ),
+                    }}
+                  >
                     Account Types
                   </p>
                 </div>
               </div>
 
               {/* Account Types Section */}
-              <div className="bg-secondary/30 rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-textPrimary mb-4">
-                  Account Types
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {seller?.account_types?.map((type, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-secondary/50 rounded-full text-sm text-textSecondary"
-                    >
-                      {type}
-                    </span>
-                  ))}
+              {seller?.account_types && seller.account_types.length > 0 && (
+                <div
+                  className="rounded-lg p-6 transition-all duration-200"
+                  style={{ backgroundColor: seller?.secondary_color }}
+                >
+                  <h2
+                    className="text-xl font-semibold mb-4"
+                    style={{ color: seller?.accent_color }}
+                  >
+                    Account Types
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {seller.account_types.map((type, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-2 rounded-full text-xs font-medium transition-all duration-200"
+                        style={{
+                          backgroundColor: darkenHexColor(
+                            seller?.accent_color || "#000000",
+                            100
+                          ),
+                        }}
+                      >
+                        <span
+                          className="font-bold"
+                          style={{ color: seller?.accent_color }}
+                        >
+                          {type}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Active Listings Section */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-textPrimary">
+              <div
+                className="rounded-lg p-6 transition-all duration-200"
+                style={{ backgroundColor: seller?.secondary_color }}
+              >
+                <h2
+                  className="text-xl font-bold mb-4"
+                  style={{ color: seller?.accent_color }}
+                >
                   Active Listings
                 </h2>
-                {listings?.length === 0 ? (
-                  <div className="bg-secondary/30 rounded-lg p-6 text-center">
-                    <p className="text-textSecondary">No active listings</p>
-                  </div>
-                ) : (
-                  listings?.map((listing) => (
+                <div className="grid gap-4">
+                  {listings.map((listing) => (
                     <div
                       key={listing.id}
-                      className="bg-secondary/30 rounded-lg p-4"
+                      className="rounded-lg p-4 transition-all duration-200 "
+                      style={{
+                        backgroundColor: darkenHexColor(
+                          seller?.accent_color,
+                          100
+                        ),
+                      }}
+                      onClick={() => handleListingClick(listing.id)}
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-textPrimary font-medium">
-                            {listing.title}
-                          </h3>
-                          <p className="text-sm text-textSecondary mt-1">
+                          <h3 className="font-medium mb-1">{listing.title}</h3>
+                          <p
+                            className="text-xs p-2 rounded-lg opacity-80"
+                            style={{ backgroundColor: seller?.accent_color }}
+                          >
                             {listing.description}
                           </p>
                         </div>
-                        <p className="text-accent font-bold">
+                        <p
+                          className="font-bold"
+                          style={{
+                            color: darkenHexColor(seller?.accent_color, -20),
+                          }}
+                        >
                           ₱{listing.price}
                         </p>
                       </div>
                     </div>
-                  ))
-                )}
+                  ))}
+                  {listings.length === 0 && (
+                    <p
+                      className="text-center py-4"
+                      style={{ color: seller?.secondary_color }}
+                    >
+                      No active listings
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Warning Message for No Vouches */}
@@ -476,7 +592,16 @@ function ProfilePage() {
                   </div>
                 </div>
               )}
+
+              {/* Color Customizer */}
+              <ColorCustomizer
+                sellerId={userData.id}
+                onSave={handleColorSave}
+              />
             </div>
+          )}
+          {activeTab === "seller profile" && isSellerLoading && (
+            <div className="text-center py-4">Loading seller profile...</div>
           )}
 
           {/* Purchases Tab */}

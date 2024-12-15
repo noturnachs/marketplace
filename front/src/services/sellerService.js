@@ -155,4 +155,35 @@ export const sellerService = {
     if (!response.ok) throw new Error(data.error);
     return data.data;
   },
+
+  getProfileCustomization: async (sellerId) => {
+    const response = await fetch(
+      `${API_URL}/sellers/${sellerId}/profile/customization`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
+
+  updateProfileCustomization: async (sellerId, colors) => {
+    const response = await fetch(
+      `${API_URL}/sellers/${sellerId}/profile/customization`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(colors),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    return data.data;
+  },
 };

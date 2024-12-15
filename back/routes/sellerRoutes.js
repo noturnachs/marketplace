@@ -4,6 +4,7 @@ const { protect } = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const Seller = require("../models/Seller");
 const SellerBalance = require("../models/SellerBalance");
+const SellerProfile = require("../models/SellerProfile");
 const pool = require("../config/db");
 
 // Admin routes
@@ -163,6 +164,37 @@ router.put("/:id/fee-exemption", protect, admin, async (req, res) => {
     const seller = await Seller.updateFeeExemption(req.params.id, isExempt);
     res.json({ success: true, data: seller });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get seller profile customization
+router.get("/:id/profile/customization", protect, async (req, res) => {
+  try {
+    const profile = await SellerProfile.getByUserId(req.params.id);
+    res.json({ success: true, data: profile });
+  } catch (error) {
+    console.error("Error fetching profile customization:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update seller profile customization
+router.put("/:id/profile/customization", protect, async (req, res) => {
+  try {
+    // Ensure user can only update their own profile
+    if (req.user.id !== parseInt(req.params.id)) {
+      return res.status(403).json({
+        success: false,
+        error: "Not authorized to update this profile",
+      });
+    }
+
+    const updatedProfile = await SellerProfile.update(req.params.id, req.body);
+
+    res.json({ success: true, data: updatedProfile });
+  } catch (error) {
+    console.error("Error updating profile customization:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

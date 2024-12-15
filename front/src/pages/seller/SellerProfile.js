@@ -13,15 +13,36 @@ function SellerProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  function darkenHexColor(hex, amount) {
+    hex = hex.replace(/^#/, "");
+
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+
+    r = Math.max(0, r - amount);
+    g = Math.max(0, g - amount);
+    b = Math.max(0, b - amount);
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [profileData, listingsData] = await Promise.all([
-          sellerService.getSellerProfile(sellerId),
-          sellerService.getSellerListings(sellerId),
-        ]);
-        setSeller(profileData);
+        const [profileData, listingsData, customizationData] =
+          await Promise.all([
+            sellerService.getSellerProfile(sellerId),
+            sellerService.getSellerListings(sellerId),
+            sellerService.getProfileCustomization(sellerId),
+          ]);
+        setSeller({
+          ...profileData,
+          primary_color: customizationData?.primary_color || "#17222e",
+          secondary_color: customizationData?.secondary_color || "#182531",
+          accent_color: customizationData?.accent_color || "#ffffff",
+        });
         setListings(listingsData);
       } catch (error) {
         setError(error.message || "Failed to load seller profile");
@@ -60,25 +81,34 @@ function SellerProfile() {
   return (
     <div className="min-h-screen bg-primary">
       <DashboardNavbar />
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main
+        className="max-w-4xl mx-auto px-4 py-8 rounded-lg mt-5"
+        style={{ backgroundColor: seller?.primary_color }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Seller Header */}
-          <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 mb-6">
+          <div
+            className="backdrop-blur-lg rounded-xl p-6 mb-6 transition-all duration-200"
+            style={{ backgroundColor: seller?.secondary_color }}
+          >
             <div className="flex items-start gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h1 className="text-2xl font-bold text-textPrimary">
+                  <h1
+                    className="text-2xl font-bold"
+                    style={{ color: seller?.accent_color }}
+                  >
                     {seller?.username}
                   </h1>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center ${
                       seller?.seller_status === "verified"
-                        ? "bg-green-500/10 text-green-500"
-                        : "bg-yellow-500/10 text-yellow-500"
+                        ? "bg-green-500/40 text-green-500"
+                        : "bg-yellow-500/40 text-yellow-500"
                     }`}
                   >
                     {seller?.seller_status === "verified"
@@ -86,8 +116,8 @@ function SellerProfile() {
                       : "Pending Verification"}
                   </span>
                 </div>
-                <div className="flex flex-col gap-y-2 mb-4">
-                  <span className="text-textSecondary text-xs">
+                <div className="flex flex-col gap-y-2 mb-1">
+                  <span className="text-xs text-yellow-500">
                     Member since{" "}
                     {new Date(seller?.created_at).toLocaleDateString()}
                   </span>
@@ -135,17 +165,9 @@ function SellerProfile() {
                     href={`https://t.me/${seller.telegram_username}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors text-sm"
+                    className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors text-xs"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.716-3.818 15.515-3.818 15.515-.121.487-.477.645-.773.645-.418 0-.706-.268-.944-.511l-4.033-3.458-1.591 1.434c-.122.098-.244.146-.366.146-.245 0-.489-.171-.489-.416v-4.584l7.142-6.689c.198-.183.198-.549-.122-.549-.074 0-.171.024-.269.098l-8.733 5.555-3.624-1.263c-.489-.171-.538-.549-.05-.818l14.909-5.825c.416-.171.806.122.806.549 0 .073-.025.171-.049.171z" />
-                    </svg>
-                    <span>@{seller.telegram_username}</span>
+                    Contact: <span>@{seller.telegram_username}</span>
                   </a>
                 )}
               </div>
@@ -153,40 +175,90 @@ function SellerProfile() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 ">
-            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-accent">
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div
+              className="rounded-lg p-6 text-center transition-all duration-200"
+              style={{ backgroundColor: seller?.secondary_color }}
+            >
+              <p
+                className="text-4xl font-bold mb-1"
+                style={{ color: darkenHexColor(seller?.accent_color, 100) }}
+              >
                 {seller?.total_listings || 0}
               </p>
-              <p className="text-sm text-textSecondary">Total Listings</p>
-            </div>
-            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-accent">
-                {seller?.vouch_count}
+              <p
+                className="text-sm font-bold"
+                style={{ color: darkenHexColor(seller?.accent_color, -20) }}
+              >
+                Total Listings
               </p>
-              <p className="text-sm text-textSecondary">Vouches</p>
             </div>
-            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-accent">
+            <div
+              className="rounded-lg p-6 text-center transition-all duration-200"
+              style={{ backgroundColor: seller?.secondary_color }}
+            >
+              <p
+                className="text-4xl font-bold mb-1"
+                style={{ color: darkenHexColor(seller?.accent_color, 100) }}
+              >
+                {seller?.vouch_count || 0}
+              </p>
+              <p
+                className="text-sm font-bold"
+                style={{ color: darkenHexColor(seller?.accent_color, -20) }}
+              >
+                Vouches
+              </p>
+            </div>
+            <div
+              className="rounded-lg p-6 text-center transition-all duration-200"
+              style={{ backgroundColor: seller?.secondary_color }}
+            >
+              <p
+                className="text-4xl font-bold mb-1"
+                style={{ color: darkenHexColor(seller?.accent_color, 100) }}
+              >
                 {seller?.account_types?.length || 0}
               </p>
-              <p className="text-sm text-textSecondary">Account Types</p>
+              <p
+                className="text-sm font-bold"
+                style={{ color: darkenHexColor(seller?.accent_color, -20) }}
+              >
+                Account Types
+              </p>
             </div>
           </div>
 
           {/* Account Types */}
           {seller?.account_types && seller.account_types.length > 0 && (
-            <div className="bg-secondary/30 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-semibold text-textPrimary mb-4">
+            <div
+              className="rounded-lg p-6 mb-6 transition-all duration-200"
+              style={{ backgroundColor: seller?.secondary_color }}
+            >
+              <h2
+                className="text-lg font-bold mb-4"
+                style={{ color: seller?.accent_color }}
+              >
                 Account Types
               </h2>
               <div className="flex flex-wrap gap-2">
                 {seller.account_types.map((type, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-secondary/50 rounded-full text-sm text-textSecondary"
+                    className="px-4 py-2 rounded-full text-xs font-regular transition-all duration-200 text-textSecondary"
+                    style={{
+                      backgroundColor: darkenHexColor(
+                        seller?.accent_color,
+                        100
+                      ),
+                    }}
                   >
-                    {type}
+                    <span
+                      className="font-bold"
+                      style={{ color: seller?.accent_color }}
+                    >
+                      {type}
+                    </span>
                   </span>
                 ))}
               </div>
@@ -194,32 +266,52 @@ function SellerProfile() {
           )}
 
           {/* Active Listings */}
-          <div className="bg-secondary/30 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-textPrimary mb-4">
+          <div
+            className="space-y-4  rounded-lg p-6"
+            style={{ backgroundColor: seller?.secondary_color }}
+          >
+            <h2
+              className="text-lg font-bold  "
+              style={{ color: seller?.accent_color }}
+            >
               Active Listings
             </h2>
             <div className="grid gap-4">
               {listings.map((listing) => (
                 <div
                   key={listing.id}
-                  className="bg-secondary/50 rounded-lg p-4 hover:bg-secondary/70 transition-colors cursor-pointer"
+                  className="rounded-lg p-4 transition-all duration-200 "
+                  style={{
+                    backgroundColor: darkenHexColor(seller?.accent_color, 100),
+                  }}
                   onClick={() => handleListingClick(listing.id)}
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-textPrimary font-medium">
-                        {listing.title}
-                      </h3>
-                      <p className="text-sm text-textSecondary">
+                      <h3 className="font-medium mb-1">{listing.title}</h3>
+                      <p
+                        className="text-xs p-2 rounded-lg opacity-80"
+                        style={{ backgroundColor: seller?.accent_color }}
+                      >
                         {listing.description}
                       </p>
                     </div>
-                    <p className="text-accent font-bold">₱{listing.price}</p>
+                    <p
+                      className="font-bold"
+                      style={{
+                        color: darkenHexColor(seller?.accent_color, -20),
+                      }}
+                    >
+                      ₱{listing.price}
+                    </p>
                   </div>
                 </div>
               ))}
               {listings.length === 0 && (
-                <p className="text-textSecondary text-center py-4">
+                <p
+                  className="text-center py-4"
+                  style={{ color: seller?.secondary_color }}
+                >
                   No active listings
                 </p>
               )}
