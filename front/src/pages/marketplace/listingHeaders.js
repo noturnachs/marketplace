@@ -28,6 +28,11 @@ import nordvpnHeader from "./assets/headers/nordvpn.png";
 import viuHeader from "./assets/headers/viu.png";
 import reminiHeader from "./assets/headers/remini.png";
 import sheinHeader from "./assets/headers/shein.png";
+import scribdHeader from "./assets/headers/scribd.png";
+import numeradeHeader from "./assets/headers/numerade.png";
+import studocuHeader from "./assets/headers/studocu.png";
+import hboHeader from "./assets/headers/hbomax.png";
+import picsartHeader from "./assets/headers/picsart.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -35,6 +40,31 @@ export const listingHeaders = [
     keyword: "gizmo",
     image: gizmoHeader,
     alt: "Gizmo Header",
+  },
+  {
+    keyword: "picsart",
+    image: picsartHeader,
+    alt: "Picsart Header",
+  },
+  {
+    keyword: "hbo",
+    image: hboHeader,
+    alt: "HBO Header",
+  },
+  {
+    keyword: "studocu",
+    image: studocuHeader,
+    alt: "Studocu Header",
+  },
+  {
+    keyword: "numerade",
+    image: numeradeHeader,
+    alt: "Numerade Header",
+  },
+  {
+    keyword: "scribd",
+    image: scribdHeader,
+    alt: "Scribd Header",
   },
   {
     keyword: "viu",
