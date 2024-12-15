@@ -11,7 +11,14 @@ import steamHeader from "./assets/headers/steam.png";
 import robloxHeader from "./assets/headers/roblox.png";
 import chatgptHeader from "./assets/headers/chatgpt.png";
 import disneyHeader from "./assets/headers/disney.png";
-
+import facebookHeader from "./assets/headers/facebook.png";
+import instagramHeader from "./assets/headers/instagram.png";
+import gramamrlyHeader from "./assets/headers/gramamrly.png";
+import quillbotHeader from "./assets/headers/quillbot.png";
+import zoomHeader from "./assets/headers/zoom.png";
+import canvaHeader from "./assets/headers/canva.png";
+import primeHeader from "./assets/headers/prime.png";
+import defaultHeader from "./assets/headers/default.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -75,21 +82,68 @@ export const listingHeaders = [
     image: disneyHeader,
     alt: "Disney Header",
   },
+  {
+    keyword: "facebook",
+    image: facebookHeader,
+    alt: "Facebook Header",
+  },
+  {
+    keyword: "instagram",
+    image: instagramHeader,
+    alt: "Instagram Header",
+  },
+  {
+    keyword: "gramamrly",
+    image: gramamrlyHeader,
+    alt: "Gramamrly Header",
+  },
+  {
+    keyword: "quillbot",
+    image: quillbotHeader,
+    alt: "Quillbot Header",
+  },
+  {
+    keyword: "zoom",
+    image: zoomHeader,
+    alt: "Zoom Header",
+  },
+  {
+    keyword: "canva",
+    image: canvaHeader,
+    alt: "Canva Header",
+  },
+  {
+    keyword: "prime",
+    image: primeHeader,
+    alt: "Prime Header",
+  },
 ];
 
 export const getListingHeader = (title) => {
-  if (!title) return null;
+  if (!title)
+    return {
+      keyword: "default",
+      image: defaultHeader,
+      alt: "Default Header",
+    };
 
   const lowerTitle = title.toLowerCase().replace(/\s+/g, ""); // Remove spaces
-  return listingHeaders.find((header) => {
+  const matchedHeader = listingHeaders.find((header) => {
     const keyword = header.keyword.toLowerCase();
     // Check both with and without spaces
     return (
       lowerTitle.includes(keyword) || title.toLowerCase().includes(keyword)
     );
   });
+
+  // Return matched header or default header object
+  return (
+    matchedHeader || {
+      keyword: "default",
+      image: defaultHeader,
+      alt: "Default Header",
+    }
+  );
 };
 
-export const hasCustomHeader = (title) => {
-  return !!getListingHeader(title);
-};
+export const hasCustomHeader = (title) => true;
