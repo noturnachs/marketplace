@@ -19,6 +19,7 @@ import zoomHeader from "./assets/headers/zoom.png";
 import canvaHeader from "./assets/headers/canva.png";
 import primeHeader from "./assets/headers/prime.png";
 import defaultHeader from "./assets/headers/default.png";
+import cheggHeader from "./assets/headers/chegg.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -116,6 +117,11 @@ export const listingHeaders = [
     keyword: "prime",
     image: primeHeader,
     alt: "Prime Header",
+  },
+  {
+    keyword: "chegg",
+    image: cheggHeader,
+    alt: "Chegg Header",
   },
 ];
 
