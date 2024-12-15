@@ -5,6 +5,7 @@ import DashboardNavbar from "../components/DashboardNavbar";
 import UserWallet from "./wallet/UserWallet";
 import { purchaseService } from "../services/purchaseService";
 import { authService } from "../services/authService";
+import { sellerService } from "../services/sellerService";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -19,12 +20,17 @@ function ProfilePage() {
   const [countdowns, setCountdowns] = useState({});
   const [isEditingTelegram, setIsEditingTelegram] = useState(false);
   const [newTelegramUsername, setNewTelegramUsername] = useState("");
+  const [seller, setSeller] = useState(null);
+  const [listings, setListings] = useState([]);
 
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
 
-  useEffect(() => {
-    fetchPurchaseHistory();
-  }, []);
+  const tabs = [
+    "Overview",
+    ...(userData.role === "seller" ? ["Seller Profile"] : []),
+    "Purchases",
+    "Wallet",
+  ];
 
   const fetchPurchaseHistory = async () => {
     try {
@@ -45,8 +51,6 @@ function ProfilePage() {
       year: "numeric",
     });
   };
-
-  const tabs = ["Overview", "Purchases", "Wallet"];
 
   // Empty state components
   const EmptyOverview = () => (
@@ -135,6 +139,27 @@ function ProfilePage() {
     }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const userId = userData.id; // Get the current user's ID
+        const [profileData, listingsData] = await Promise.all([
+          sellerService.getSellerProfile(userId),
+          sellerService.getSellerListings(userId),
+        ]);
+        setSeller(profileData);
+        setListings(listingsData);
+      } catch (error) {
+        setError(error.message || "Failed to load profile data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userData.id]);
+
   return (
     <div className="min-h-screen bg-primary">
       <DashboardNavbar />
@@ -156,12 +181,12 @@ function ProfilePage() {
                   Member since {formatJoinDate(userData.created_at)}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4 w-full sm:w-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 w-full sm:w-auto">
                 <div className="text-center p-3 bg-secondary/30 rounded-lg">
                   <p className="text-xl sm:text-2xl font-bold text-accent">
                     {purchaseHistory.length}
                   </p>
-                  <p className="text-xs text-textSecondary">Total Purchases</p>
+                  <p className="text-xs text-textSecondary">Purchases</p>
                 </div>
                 <div className="text-center p-3 bg-secondary/30 rounded-lg">
                   <p className="text-xl sm:text-2xl font-bold text-accent">
@@ -171,6 +196,24 @@ function ProfilePage() {
                       .toFixed(2)}
                   </p>
                   <p className="text-xs text-textSecondary">Total Spent</p>
+                </div>
+                <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-accent">
+                    {listings?.length || 0}
+                  </p>
+                  <p className="text-xs text-textSecondary">Listings</p>
+                </div>
+                <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-accent">
+                    {seller?.vouches || 0}
+                  </p>
+                  <p className="text-xs text-textSecondary">Vouches</p>
+                </div>
+                <div className="text-center p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-accent">
+                    {seller?.account_types?.length || 0}
+                  </p>
+                  <p className="text-xs text-textSecondary">Account Types</p>
                 </div>
               </div>
             </div>
@@ -338,6 +381,99 @@ function ProfilePage() {
                   >
                     Add Telegram Username
                   </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Seller Profile Tab */}
+          {activeTab === "seller profile" && (
+            <div className="space-y-6">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-secondary/30 rounded-lg p-6 text-center">
+                  <p className="text-3xl font-bold text-accent">
+                    {listings?.length || 0}
+                  </p>
+                  <p className="text-sm text-textSecondary mt-1">
+                    Total Listings
+                  </p>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-6 text-center">
+                  <p className="text-3xl font-bold text-accent">
+                    {seller?.vouches || 0}
+                  </p>
+                  <p className="text-sm text-textSecondary mt-1">Vouches</p>
+                </div>
+                <div className="bg-secondary/30 rounded-lg p-6 text-center">
+                  <p className="text-3xl font-bold text-accent">
+                    {seller?.account_types?.length || 0}
+                  </p>
+                  <p className="text-sm text-textSecondary mt-1">
+                    Account Types
+                  </p>
+                </div>
+              </div>
+
+              {/* Account Types Section */}
+              <div className="bg-secondary/30 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-textPrimary mb-4">
+                  Account Types
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {seller?.account_types?.map((type, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-secondary/50 rounded-full text-sm text-textSecondary"
+                    >
+                      {type}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Listings Section */}
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-textPrimary">
+                  Active Listings
+                </h2>
+                {listings?.length === 0 ? (
+                  <div className="bg-secondary/30 rounded-lg p-6 text-center">
+                    <p className="text-textSecondary">No active listings</p>
+                  </div>
+                ) : (
+                  listings?.map((listing) => (
+                    <div
+                      key={listing.id}
+                      className="bg-secondary/30 rounded-lg p-4"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-textPrimary font-medium">
+                            {listing.title}
+                          </h3>
+                          <p className="text-sm text-textSecondary mt-1">
+                            {listing.description}
+                          </p>
+                        </div>
+                        <p className="text-accent font-bold">
+                          ₱{listing.price}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Warning Message for No Vouches */}
+              {seller?.vouches === 0 && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-yellow-500">⚠️</span>
+                    <p className="text-yellow-500">
+                      Seller has no vouches, buy with care.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

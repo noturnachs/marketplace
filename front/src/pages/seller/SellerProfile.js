@@ -153,13 +153,7 @@ function SellerProfile() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-accent">
-                {seller?.total_sales || 0}
-              </p>
-              <p className="text-sm text-textSecondary">Total Sales</p>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 ">
             <div className="bg-secondary/30 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-accent">
                 {seller?.total_listings || 0}
