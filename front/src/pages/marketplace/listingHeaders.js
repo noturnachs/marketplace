@@ -20,6 +20,9 @@ import canvaHeader from "./assets/headers/canva.png";
 import primeHeader from "./assets/headers/prime.png";
 import defaultHeader from "./assets/headers/default.png";
 import cheggHeader from "./assets/headers/chegg.png";
+import courseheroHeader from "./assets/headers/coursehero.png";
+import vivamaxHeader from "./assets/headers/vivamax.png";
+import valorantHeader from "./assets/headers/valorant.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -27,6 +30,21 @@ export const listingHeaders = [
     keyword: "gizmo",
     image: gizmoHeader,
     alt: "Gizmo Header",
+  },
+  {
+    keyword: "valorant",
+    image: valorantHeader,
+    alt: "Valorant Header",
+  },
+  {
+    keyword: "vivamax",
+    image: vivamaxHeader,
+    alt: "Vivamax Header",
+  },
+  {
+    keyword: "coursehero",
+    image: courseheroHeader,
+    alt: "Coursehero Header",
   },
   {
     keyword: "netflix",
