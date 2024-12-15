@@ -27,6 +27,7 @@ import vyprvpnHeader from "./assets/headers/vyprvpn.png";
 import nordvpnHeader from "./assets/headers/nordvpn.png";
 import viuHeader from "./assets/headers/viu.png";
 import reminiHeader from "./assets/headers/remini.png";
+import sheinHeader from "./assets/headers/shein.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -69,6 +70,11 @@ export const listingHeaders = [
     keyword: "netflix",
     image: netflixHeader,
     alt: "Netflix Header",
+  },
+  {
+    keyword: "shein",
+    image: sheinHeader,
+    alt: "Shein Header",
   },
   {
     keyword: "spotify",
