@@ -16,10 +16,8 @@ function DashboardNavbar() {
   const isBuyer = userData.role === "buyer";
 
   useEffect(() => {
-    if (isBuyer) {
-      fetchBalance();
-    }
-  }, [isBuyer]);
+    fetchBalance();
+  }, []);
 
   const fetchBalance = async () => {
     try {
@@ -54,32 +52,30 @@ function DashboardNavbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
-            {isBuyer && (
-              <div className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-lg">
-                <span className="text-sm font-medium text-accent">
-                  ₱{balance}
-                </span>
-                <button
-                  onClick={() => navigate("/wallet")}
-                  className="w-6 h-6 flex items-center justify-center bg-accent hover:bg-accent/80 text-white rounded-full transition-colors"
+            <div className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-lg">
+              <span className="text-sm font-medium text-accent">
+                ₱{balance}
+              </span>
+              <button
+                onClick={() => navigate("/wallet")}
+                className="w-6 h-6 flex items-center justify-center bg-accent hover:bg-accent/80 text-white rounded-full transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </button>
+            </div>
             <button
               onClick={() =>
                 navigate(isProfilePage ? "/dashboard" : "/profile")
@@ -145,35 +141,33 @@ function DashboardNavbar() {
               className="md:hidden"
             >
               <div className="flex flex-col gap-3 pt-3 pb-2">
-                {isBuyer && (
-                  <div className="flex items-center justify-between py-1.5 px-3 bg-secondary/30 rounded-lg">
-                    <span className="text-sm font-medium text-accent">
-                      ₱{balance}
-                    </span>
-                    <button
-                      onClick={() => {
-                        navigate("/wallet");
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-6 h-6 flex items-center justify-center bg-accent hover:bg-accent/80 text-white rounded-full transition-colors"
+                <div className="flex items-center justify-between py-1.5 px-3 bg-secondary/30 rounded-lg">
+                  <span className="text-sm font-medium text-accent">
+                    ₱{balance}
+                  </span>
+                  <button
+                    onClick={() => {
+                      navigate("/wallet");
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-6 h-6 flex items-center justify-center bg-accent hover:bg-accent/80 text-white rounded-full transition-colors"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-4 h-4"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                        className="w-4 h-4"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4.5v15m7.5-7.5h-15"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4.5v15m7.5-7.5h-15"
+                      />
+                    </svg>
+                  </button>
+                </div>
                 <button
                   onClick={() => {
                     navigate(isProfilePage ? "/dashboard" : "/profile");
