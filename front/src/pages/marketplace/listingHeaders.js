@@ -40,12 +40,18 @@ import smartHeader from "./assets/headers/smart.png";
 import tntHeader from "./assets/headers/tnt.png";
 import tmHeader from "./assets/headers/tm.png";
 import mathwayHeader from "./assets/headers/mathway.png";
+import ms365Header from "./assets/headers/365.png";
 
 export const listingHeaders = [
   {
     keyword: "gizmo",
     image: gizmoHeader,
     alt: "Gizmo Header",
+  },
+  {
+    keyword: "365",
+    image: ms365Header,
+    alt: "365 Header",
   },
   {
     keyword: "mathway",
