@@ -15,6 +15,7 @@ function ListingsTab() {
     category: "",
     duration: "",
     features: [],
+    in_stock: true,
   });
   const [newFeature, setNewFeature] = useState("");
 
@@ -37,8 +38,13 @@ function ListingsTab() {
     e.preventDefault();
     try {
       if (editingListing) {
+        console.log("Updating listing with data:", {
+          listingId: editingListing.id,
+          formData,
+        });
         await listingService.update(editingListing.id, formData);
       } else {
+        console.log("Creating new listing with data:", formData);
         await listingService.create(formData);
       }
       setIsAddingListing(false);
@@ -50,9 +56,11 @@ function ListingsTab() {
         category: "",
         duration: "",
         features: [],
+        in_stock: true,
       });
       fetchListings();
     } catch (error) {
+      console.error("Error submitting listing:", error);
       setError(error.message);
     }
   };
@@ -69,15 +77,19 @@ function ListingsTab() {
   };
 
   const handleEdit = (listing) => {
+    console.log("Editing listing:", listing);
     setEditingListing(listing);
-    setFormData({
+    const formDataToSet = {
       title: listing.title,
       description: listing.description,
       price: listing.price,
       category: listing.category,
       duration: listing.duration,
       features: listing.features,
-    });
+      in_stock: listing.in_stock ?? true,
+    };
+    console.log("Setting form data:", formDataToSet);
+    setFormData(formDataToSet);
     setIsAddingListing(true);
   };
 
@@ -117,6 +129,7 @@ function ListingsTab() {
                 category: "",
                 duration: "",
                 features: [],
+                in_stock: true,
               });
             }}
             className="bg-accent text-white px-4 py-2 rounded-lg text-sm"
@@ -223,6 +236,38 @@ function ListingsTab() {
                       className="w-full bg-secondary/50 rounded-lg px-4 py-2 text-textPrimary placeholder:text-textSecondary/50"
                       required
                     />
+                  </div>
+
+                  {/* In Stock Toggle */}
+                  <div>
+                    <label className="block text-sm font-medium text-textSecondary mb-1">
+                      Stock Status
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            in_stock: !formData.in_stock,
+                          })
+                        }
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          formData.in_stock ? "bg-green-500" : "bg-gray-500"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            formData.in_stock
+                              ? "translate-x-6"
+                              : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                      <span className="text-sm text-textSecondary">
+                        {formData.in_stock ? "In Stock" : "Out of Stock"}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -341,8 +386,17 @@ function ListingsTab() {
                   <div className="flex items-center gap-2">
                     {Icon && <Icon className={`w-5 h-5 ${category.color}`} />}
                     <div>
-                      <h3 className="font-medium text-textPrimary">
+                      <h3 className="font-medium text-textPrimary flex items-center gap-2">
                         {listing.title}
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            listing.in_stock
+                              ? "bg-green-500/10 text-green-500 border border-green-500/20"
+                              : "bg-red-500/10 text-red-500 border border-red-500/20"
+                          }`}
+                        >
+                          {listing.in_stock ? "In Stock" : "Out of Stock"}
+                        </span>
                       </h3>
                       <p className="text-sm text-textSecondary">
                         ₱{listing.price}

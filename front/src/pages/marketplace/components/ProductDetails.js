@@ -166,6 +166,20 @@ function ProductDetails() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-textSecondary mb-2">
+                        Status
+                      </h3>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${
+                          listing.in_stock
+                            ? "bg-green-500/10 text-green-500 border border-green-500/20"
+                            : "bg-red-500/10 text-red-500 border border-red-500/20"
+                        }`}
+                      >
+                        {listing.in_stock ? "In Stock" : "Out of Stock"}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-textSecondary mb-2">
                         Seller
                       </h3>
                       <div className="space-y-1">
@@ -252,9 +266,14 @@ function ProductDetails() {
                   </button>
                   <button
                     onClick={handlePurchaseClick}
-                    className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
+                    disabled={!listing.in_stock || isPurchasing}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      listing.in_stock
+                        ? "bg-accent text-white hover:bg-accent/90"
+                        : "bg-gray-500/50 text-gray-400 cursor-not-allowed"
+                    }`}
                   >
-                    Purchase Now
+                    {listing.in_stock ? "Purchase Now" : "Out of Stock"}
                   </button>
                 </div>
               </div>

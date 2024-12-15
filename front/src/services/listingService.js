@@ -54,17 +54,30 @@ export const listingService = {
 
   async update(id, listing) {
     const token = localStorage.getItem("token");
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(listing),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error);
-    return data.data;
+    try {
+      console.log("Sending update request with data:", listing);
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(listing),
+      });
+
+      const data = await response.json();
+      console.log("Response from server:", data);
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || data.error || "Failed to update listing"
+        );
+      }
+      return data.data;
+    } catch (error) {
+      console.error("Update error:", error);
+      throw error;
+    }
   },
 
   async delete(id) {

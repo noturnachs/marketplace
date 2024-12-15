@@ -36,11 +36,12 @@ class Listing {
       category,
       duration,
       features,
+      in_stock = true,
     } = listingData;
 
     const query = `
-      INSERT INTO listings (seller_id, title, description, price, category, duration, features)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO listings (seller_id, title, description, price, category, duration, features, in_stock)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
 
@@ -52,6 +53,7 @@ class Listing {
       category,
       duration,
       features || [],
+      in_stock,
     ];
 
     const { rows } = await pool.query(query, values);
@@ -84,14 +86,21 @@ class Listing {
     return result.rows[0];
   }
 
-  static async update(id, listingData) {
-    const { title, description, price, category, duration, features } =
-      listingData;
+  static async update(id, sellerId, listingData) {
+    const {
+      title,
+      description,
+      price,
+      category,
+      duration,
+      features,
+      in_stock,
+    } = listingData;
 
     const query = `
       UPDATE listings 
-      SET title = $1, description = $2, price = $3, category = $4, duration = $5, features = $6
-      WHERE id = $7
+      SET title = $1, description = $2, price = $3, category = $4, duration = $5, features = $6, in_stock = $7
+      WHERE id = $8 AND seller_id = $9
       RETURNING *
     `;
 
@@ -102,7 +111,9 @@ class Listing {
       category,
       duration,
       features || [],
+      in_stock,
       id,
+      sellerId,
     ];
 
     const { rows } = await pool.query(query, values);
