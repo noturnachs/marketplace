@@ -22,7 +22,6 @@ function SellerProfile() {
           sellerService.getSellerListings(sellerId),
         ]);
         setSeller(profileData);
-        console.log(profileData);
         setListings(listingsData);
       } catch (error) {
         setError(error.message || "Failed to load seller profile");
