@@ -126,6 +126,7 @@ class Seller {
         u.selling_experience,
         u.has_vouches,
         u.vouch_link,
+        u.vouch_count,
         u.last_login,
         COUNT(DISTINCT l.id) as total_listings,
         COUNT(DISTINCT p.id) as total_sales,
@@ -144,6 +145,7 @@ class Seller {
         u.selling_experience,
         u.has_vouches,
         u.vouch_link,
+        u.vouch_count,
         u.last_login
     `;
 
@@ -196,6 +198,40 @@ class Seller {
 
     const { rows } = await pool.query(query, [sellerId]);
     return rows[0]?.fee_exempt || false;
+  }
+
+  static async getProfile(id) {
+    const query = `
+      SELECT 
+        u.id,
+        u.username,
+        u.telegram_username,
+        u.created_at,
+        u.seller_status,
+        u.has_vouches,
+        u.vouch_link,
+        u.vouch_count,
+        u.account_types,
+        COALESCE(
+          (SELECT COUNT(*) FROM listings l WHERE l.seller_id = u.id AND l.in_stock = true),
+          0
+        ) as total_listings,
+        COALESCE(
+          (SELECT COUNT(*) FROM purchases p 
+           JOIN listings l ON p.listing_id = l.id 
+           WHERE l.seller_id = u.id AND p.status = 'completed' AND p.is_confirmed = true),
+          0
+        ) as total_sales
+      FROM users u
+      WHERE u.id = $1 AND u.role = 'seller'
+    `;
+
+    const { rows } = await pool.query(query, [id]);
+    if (rows.length === 0) {
+      throw new Error("Seller not found");
+    }
+
+    return rows[0];
   }
 }
 

@@ -153,7 +153,7 @@ function SellerProfile() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div className="bg-secondary/30 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-accent">
                 {seller?.total_sales || 0}
@@ -166,7 +166,13 @@ function SellerProfile() {
               </p>
               <p className="text-sm text-textSecondary">Total Listings</p>
             </div>
-            <div className="bg-secondary/30 rounded-lg p-4 text-center col-span-2 sm:col-span-1">
+            <div className="bg-secondary/30 rounded-lg p-4 text-center">
+              <p className="text-2xl font-bold text-accent">
+                {seller?.vouch_count}
+              </p>
+              <p className="text-sm text-textSecondary">Vouches</p>
+            </div>
+            <div className="bg-secondary/30 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-accent">
                 {seller?.account_types?.length || 0}
               </p>

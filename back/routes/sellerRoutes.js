@@ -64,6 +64,7 @@ router.get("/:id/profile", protect, async (req, res) => {
         u.created_at,
         u.has_vouches,
         u.vouch_link,
+        u.vouch_count,
         COUNT(DISTINCT l.id) as total_listings,
         COUNT(DISTINCT p.id) as total_sales,
         COALESCE(SUM(p.amount), 0) as total_earnings
@@ -72,7 +73,7 @@ router.get("/:id/profile", protect, async (req, res) => {
       LEFT JOIN purchases p ON l.id = p.listing_id
       WHERE u.id = $1 AND u.role = 'seller'
       GROUP BY u.id, u.username, u.telegram_username, u.seller_status, 
-        u.account_types, u.created_at, u.has_vouches, u.vouch_link
+        u.account_types, u.created_at, u.has_vouches, u.vouch_link, u.vouch_count
     `;
 
     const { rows } = await pool.query(query, [req.params.id]);
@@ -92,6 +93,7 @@ router.get("/:id/profile", protect, async (req, res) => {
       total_listings: rows[0].total_listings,
       has_vouches: rows[0].has_vouches,
       vouch_link: rows[0].vouch_link,
+      vouch_count: rows[0].vouch_count || 0,
     };
 
     res.json({ success: true, data: publicProfile });
@@ -138,12 +140,10 @@ router.put("/:id/status", protect, admin, async (req, res) => {
     res.json({ success: true, data: seller });
   } catch (error) {
     console.error("Error updating seller status:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: error.message || "Failed to update seller status",
-      });
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to update seller status",
+    });
   }
 });
 

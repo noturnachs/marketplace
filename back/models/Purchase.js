@@ -263,10 +263,19 @@ class Purchase {
         [id]
       );
 
-      // Now add the amount to seller's wallet
+      // Add the amount to seller's wallet
       await client.query(
         "UPDATE wallets SET coins = coins + $1 WHERE user_id = $2",
         [purchase.amount, purchase.seller_id]
+      );
+
+      // Increment the seller's vouch count
+      await client.query(
+        `UPDATE users 
+         SET vouch_count = vouch_count + 1,
+             has_vouches = TRUE
+         WHERE id = $1`,
+        [purchase.seller_id]
       );
 
       await client.query("COMMIT");
