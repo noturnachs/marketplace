@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
 import Promotion from "../components/Promotion";
 import bgLanding from "./imgs/bg-landing.png";
+import { FaUserPlus, FaWallet, FaShoppingCart } from "react-icons/fa";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -82,38 +83,59 @@ function LandingPage() {
               How It Works
             </h2>
             <motion.div
-              className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12"
+              className="grid sm:grid-cols-3 gap-8 sm:gap-12 relative"
               variants={stagger}
               initial="initial"
               whileInView="whileInView"
               viewport={{ once: true }}
             >
+              {/* Connecting lines between steps */}
+
               {[
                 {
                   step: "01",
                   title: "Create Account",
                   desc: "Sign up and verify your identity in minutes.",
+                  icon: FaUserPlus,
                 },
                 {
                   step: "02",
                   title: "Cash In",
                   desc: "Add funds to your wallet via GCash.",
+                  icon: FaWallet,
                 },
                 {
                   step: "03",
                   title: "Buy Accounts",
                   desc: "Purchase premium accounts from verified sellers.",
+                  icon: FaShoppingCart,
                 },
               ].map((item, i) => (
-                <div key={i} className="relative">
-                  <div className="text-4xl sm:text-5xl font-bold text-accent/20 mb-4">
-                    {item.step}
+                <motion.div
+                  key={i}
+                  className="relative"
+                  whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <motion.div
+                      className="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center mb-6"
+                      whileHover={{
+                        scale: 1.1,
+                        backgroundColor: "rgba(var(--color-accent), 0.2)",
+                      }}
+                    >
+                      <item.icon className="w-8 h-8 text-accent" />
+                    </motion.div>
+                    <div className="text-4xl font-bold text-accent/20 mb-4">
+                      {item.step}
+                    </div>
+                    <h3 className="text-xl font-semibold text-textPrimary mb-3">
+                      {item.title}
+                    </h3>
+                    <p className="text-textSecondary">{item.desc}</p>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-textPrimary mb-3">
-                    {item.title}
-                  </h3>
-                  <p className="text-textSecondary">{item.desc}</p>
-                </div>
+                </motion.div>
               ))}
             </motion.div>
           </motion.div>
