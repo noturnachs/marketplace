@@ -11,6 +11,7 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [showForgotMessage, setShowForgotMessage] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -43,6 +44,12 @@ function LoginPage() {
   const handleSignupClick = (e) => {
     e.preventDefault();
     navigate("/signup");
+  };
+
+  const handleForgotClick = (e) => {
+    e.preventDefault();
+    setShowForgotMessage(true);
+    setTimeout(() => setShowForgotMessage(false), 5000); // Show for 5 seconds
   };
 
   return (
@@ -131,12 +138,40 @@ function LoginPage() {
 
             {/* Additional Links */}
             <div className="text-center text-xs">
-              <a
-                href="#forgot"
+              <button
+                onClick={handleForgotClick}
                 className="text-accent hover:text-accent/80 transition-colors"
               >
                 Forgot password?
-              </a>
+              </button>
+              {showForgotMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-2 p-3 bg-secondary/30 rounded-lg space-y-2"
+                >
+                  <p className="text-textSecondary">
+                    Please contact admin via Telegram for password reset
+                  </p>
+                  <a
+                    href="https://t.me/ppprtts"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.716-3.818 15.515-3.818 15.515-.121.487-.477.645-.773.645-.418 0-.706-.268-.944-.511l-4.033-3.458-1.591 1.434c-.122.098-.244.146-.366.146-.245 0-.489-.171-.489-.416v-4.584l7.142-6.689c.198-.183.198-.549-.122-.549-.074 0-.171.024-.269.098l-8.733 5.555-3.624-1.263c-.489-.171-.538-.549-.05-.818l14.909-5.825c.416-.171.806.122.806.549 0 .073-.025.171-.049.171z" />
+                    </svg>
+                    <span>@ppprtts</span>
+                  </a>
+                </motion.div>
+              )}
             </div>
           </form>
 
