@@ -57,7 +57,7 @@ function LandingPage() {
             </p>
             <motion.button
               onClick={() => navigate("/login")}
-              className="bg-accent/90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium hover:bg-accent transition-all hover:scale-105 transform"
+              className="bg-accent/90 text-white px-5 sm:px-5 py-2 sm:py-3 rounded-lg text-base sm:text-lg font-medium hover:bg-accent transition-all hover:scale-105 transform"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
