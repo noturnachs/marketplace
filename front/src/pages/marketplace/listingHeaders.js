@@ -13,7 +13,7 @@ import chatgptHeader from "./assets/headers/chatgpt.png";
 import disneyHeader from "./assets/headers/disney.png";
 import facebookHeader from "./assets/headers/facebook.png";
 import instagramHeader from "./assets/headers/instagram.png";
-import gramamrlyHeader from "./assets/headers/grammarly.png";
+import grammarlyHeader from "./assets/headers/grammarly.png";
 import quillbotHeader from "./assets/headers/quillbot.png";
 import zoomHeader from "./assets/headers/zoom.png";
 import canvaHeader from "./assets/headers/canva.png";
@@ -136,9 +136,9 @@ export const listingHeaders = [
     alt: "Instagram Header",
   },
   {
-    keyword: "gramamrly",
-    image: gramamrlyHeader,
-    alt: "Gramamrly Header",
+    keyword: "grammarly",
+    image: grammarlyHeader,
+    alt: "Grammarly Header",
   },
   {
     keyword: "quillbot",
