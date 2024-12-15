@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import DashboardNavbar from "../../components/DashboardNavbar";
 import { sellerService } from "../../services/sellerService";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 function SellerProfile() {
   const { sellerId } = useParams();
+  const navigate = useNavigate();
   const [seller, setSeller] = useState(null);
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +22,7 @@ function SellerProfile() {
           sellerService.getSellerListings(sellerId),
         ]);
         setSeller(profileData);
+        console.log(profileData);
         setListings(listingsData);
       } catch (error) {
         setError(error.message || "Failed to load seller profile");
@@ -31,13 +34,15 @@ function SellerProfile() {
     fetchData();
   }, [sellerId]);
 
+  const handleListingClick = (listingId) => {
+    navigate(`/marketplace/${listingId}`);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-primary">
         <DashboardNavbar />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <p className="text-textSecondary">Loading seller profile...</p>
-        </div>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -66,12 +71,12 @@ function SellerProfile() {
           <div className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 mb-6">
             <div className="flex items-start gap-6">
               <div className="flex-1">
-                <h1 className="text-2xl font-bold text-textPrimary mb-2">
-                  {seller?.username}
-                </h1>
-                <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h1 className="text-2xl font-bold text-textPrimary">
+                    {seller?.username}
+                  </h1>
                   <span
-                    className={`px-3 py-1 rounded-full text-sm inline-flex items-center w-fit ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center ${
                       seller?.seller_status === "verified"
                         ? "bg-green-500/10 text-green-500"
                         : "bg-yellow-500/10 text-yellow-500"
@@ -81,10 +86,50 @@ function SellerProfile() {
                       ? "Verified Seller"
                       : "Pending Verification"}
                   </span>
-                  <span className="text-textSecondary text-sm">
+                </div>
+                <div className="flex flex-col gap-y-2 mb-4">
+                  <span className="text-textSecondary text-xs">
                     Member since{" "}
                     {new Date(seller?.created_at).toLocaleDateString()}
                   </span>
+                  {seller?.has_vouches && seller?.vouch_link ? (
+                    <a
+                      href={seller.vouch_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      View Vouches
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-1 text-xs text-yellow-500">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Seller has no vouches, buy with care.
+                    </div>
+                  )}
                 </div>
                 {seller?.telegram_username && (
                   <a
@@ -158,7 +203,8 @@ function SellerProfile() {
               {listings.map((listing) => (
                 <div
                   key={listing.id}
-                  className="bg-secondary/50 rounded-lg p-4 hover:bg-secondary/70 transition-colors"
+                  className="bg-secondary/50 rounded-lg p-4 hover:bg-secondary/70 transition-colors cursor-pointer"
+                  onClick={() => handleListingClick(listing.id)}
                 >
                   <div className="flex justify-between items-start">
                     <div>
