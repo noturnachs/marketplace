@@ -178,7 +178,7 @@ function Marketplace() {
                         </p>
                       </div>
                       <p className="text-sm font-bold text-accent">
-                        ₱{listing.price} <span className="text-sm">coins</span>
+                        ₱{listing.price}
                       </p>
                     </div>
 

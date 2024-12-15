@@ -161,7 +161,7 @@ function ProductDetails() {
                         Price
                       </h3>
                       <p className="text-lg font-bold text-accent">
-                        ₱{listing.price} <span className="text-sm">coins</span>
+                        ₱{listing.price}
                       </p>
                     </div>
                     <div>
