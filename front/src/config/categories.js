@@ -70,7 +70,7 @@ export const categories = [
   },
   {
     id: "data",
-    name: "Smart/Globe GB",
+    name: "Mobile Recharge",
     icon: HiSignal,
     color: "text-emerald-500",
   },
