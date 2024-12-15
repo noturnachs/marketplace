@@ -314,18 +314,44 @@ function SignupPage() {
                       htmlFor="vouchLink"
                       className="block text-xs font-medium text-textSecondary mb-1"
                     >
-                      Telegram Vouch Channel Link
+                      Vouch Link
                     </label>
-                    <input
-                      id="vouchLink"
-                      type="url"
-                      value={formData.vouchLink}
-                      onChange={(e) =>
-                        setFormData({ ...formData, vouchLink: e.target.value })
-                      }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-secondary focus:border-accent focus:outline-none text-textPrimary text-sm"
-                      placeholder="https://t.me/your_vouch_channel"
-                    />
+                    <div className="space-y-2">
+                      <input
+                        id="vouchLink"
+                        type="url"
+                        value={formData.vouchLink}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            vouchLink: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-secondary focus:border-accent focus:outline-none text-textPrimary text-sm"
+                        placeholder="Enter your vouch link"
+                      />
+                      <div className="text-xs text-textSecondary">
+                        Accepted platforms:
+                        <div className="mt-1 flex flex-wrap gap-2">
+                          {[
+                            { name: "Telegram", url: "t.me/" },
+                            { name: "Facebook", url: "facebook.com/" },
+                            { name: "Twitter", url: "twitter.com/" },
+                            { name: "Instagram", url: "instagram.com/" },
+                          ].map((platform) => (
+                            <div
+                              key={platform.name}
+                              className="inline-flex items-center px-2 py-1 rounded-md bg-secondary/30 text-textSecondary"
+                            >
+                              <span>{platform.name}</span>
+                              <span className="ml-1 text-accent/60">
+                                {platform.url}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </>
