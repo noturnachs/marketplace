@@ -33,6 +33,7 @@ import numeradeHeader from "./assets/headers/numerade.png";
 import studocuHeader from "./assets/headers/studocu.png";
 import hboHeader from "./assets/headers/hbomax.png";
 import picsartHeader from "./assets/headers/picsart.png";
+import quizletHeader from "./assets/headers/quizlet.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -175,6 +176,11 @@ export const listingHeaders = [
     keyword: "grammarly",
     image: grammarlyHeader,
     alt: "Grammarly Header",
+  },
+  {
+    keyword: "quizlet",
+    image: quizletHeader,
+    alt: "Quizlet Header",
   },
   {
     keyword: "quillbot",
