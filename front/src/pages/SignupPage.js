@@ -491,10 +491,22 @@ function SignupPage() {
                       /verify {verificationCode}
                     </span>
                   </p>
-                  {isVerified && (
+                  {isVerified ? (
                     <div className="mt-2 text-green-500 text-sm">
                       ✓ Verified successfully!
                     </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-textSecondary">
+                      Having trouble verifying?{" "}
+                      <a
+                        href="https://t.me/ppprtts"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent hover:text-accent/80"
+                      >
+                        Contact support
+                      </a>
+                    </p>
                   )}
                 </div>
               )}
