@@ -23,6 +23,7 @@ import cheggHeader from "./assets/headers/chegg.png";
 import courseheroHeader from "./assets/headers/coursehero.png";
 import vivamaxHeader from "./assets/headers/vivamax.png";
 import valorantHeader from "./assets/headers/valorant.png";
+import vyprvpnHeader from "./assets/headers/vyprvpn.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -30,6 +31,11 @@ export const listingHeaders = [
     keyword: "gizmo",
     image: gizmoHeader,
     alt: "Gizmo Header",
+  },
+  {
+    keyword: "vyprvpn",
+    image: vyprvpnHeader,
+    alt: "VyprVPN Header",
   },
   {
     keyword: "valorant",
