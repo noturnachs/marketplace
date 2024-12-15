@@ -5,6 +5,7 @@ import { listingService } from "../../services/listingService";
 import { categories, getCategoryByName } from "../../config/categories";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import debounce from "lodash/debounce";
+import { getListingHeader } from "./listingHeaders";
 
 function Marketplace() {
   const navigate = useNavigate();
@@ -142,60 +143,72 @@ function Marketplace() {
             {filteredListings.map((listing) => {
               const category = getCategoryByName(listing.category);
               const Icon = category?.icon;
+              const headerConfig = getListingHeader(listing.title);
 
               return (
                 <motion.div
                   key={listing.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="bg-secondary/50 backdrop-blur-lg rounded-xl p-6 space-y-4 cursor-pointer hover:bg-secondary/60 transition-colors"
+                  className="bg-secondary/50 backdrop-blur-lg rounded-xl overflow-hidden cursor-pointer hover:bg-secondary/60 transition-colors"
                   onClick={() => navigate(`/marketplace/${listing.id}`)}
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        {Icon && (
-                          <Icon className={`w-5 h-5 ${category.color}`} />
-                        )}
-                        <h3 className="text-sm font-semibold text-textPrimary">
-                          {listing.title}
-                        </h3>
+                  {headerConfig && (
+                    <div className="w-full h-32 bg-secondary">
+                      <img
+                        src={headerConfig.image}
+                        alt={headerConfig.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          {Icon && (
+                            <Icon className={`w-5 h-5 ${category.color}`} />
+                          )}
+                          <h3 className="text-sm font-semibold text-textPrimary">
+                            {listing.title}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-textSecondary">
+                          {listing.duration}
+                        </p>
                       </div>
-                      <p className="text-xs text-textSecondary">
-                        {listing.duration}
+                      <p className="text-sm font-bold text-accent">
+                        ₱{listing.price} <span className="text-sm">coins</span>
                       </p>
                     </div>
-                    <p className="text-sm font-bold text-accent">
-                      ₱{listing.price} <span className="text-sm">coins</span>
+
+                    <p className="text-xs text-textSecondary line-clamp-2">
+                      {listing.description}
                     </p>
-                  </div>
 
-                  <p className="text-xs text-textSecondary line-clamp-2">
-                    {listing.description}
-                  </p>
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex flex-col">
-                      <Link
-                        to={`/seller/${listing.seller_id}/profile`}
-                        className="text-xs text-blue-500 hover:text-blue-400 transition-colors cursor-pointer"
-                        onClick={(e) => e.stopPropagation()} // Add this to prevent triggering the parent onClick
+                    <div className="flex justify-between items-center">
+                      <div className="flex flex-col">
+                        <Link
+                          to={`/seller/${listing.seller_id}/profile`}
+                          className="text-xs text-blue-500 hover:text-blue-400 transition-colors cursor-pointer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {listing.seller_name}
+                        </Link>
+                        <p className="text-xs text-[#22c55e]">
+                          @{listing.seller_telegram}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/marketplace/${listing.id}`);
+                        }}
+                        className="bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
                       >
-                        {listing.seller_name}
-                      </Link>
-                      <p className="text-xs text-[#22c55e]">
-                        @{listing.seller_telegram}
-                      </p>
+                        View Details
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/marketplace/${listing.id}`);
-                      }}
-                      className="bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors"
-                    >
-                      View Details
-                    </button>
                   </div>
                 </motion.div>
               );
