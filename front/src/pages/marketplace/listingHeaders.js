@@ -34,13 +34,42 @@ import studocuHeader from "./assets/headers/studocu.png";
 import hboHeader from "./assets/headers/hbomax.png";
 import picsartHeader from "./assets/headers/picsart.png";
 import quizletHeader from "./assets/headers/quizlet.png";
-// Import other headers here as needed
+import applemusicHeader from "./assets/headers/applemusic.png";
+import globeHeader from "./assets/headers/globe.png";
+import smartHeader from "./assets/headers/smart.png";
+import tntHeader from "./assets/headers/tnt.png";
+import tmHeader from "./assets/headers/tm.png";
 
 export const listingHeaders = [
   {
     keyword: "gizmo",
     image: gizmoHeader,
     alt: "Gizmo Header",
+  },
+  {
+    keyword: "tm",
+    image: tmHeader,
+    alt: "TM Header",
+  },
+  {
+    keyword: "tnt",
+    image: tntHeader,
+    alt: "TNT Header",
+  },
+  {
+    keyword: "smart",
+    image: smartHeader,
+    alt: "Smart Header",
+  },
+  {
+    keyword: "globe",
+    image: globeHeader,
+    alt: "Globe Header",
+  },
+  {
+    keyword: "applemusic",
+    image: applemusicHeader,
+    alt: "Apple Music Header",
   },
   {
     keyword: "picsart",
