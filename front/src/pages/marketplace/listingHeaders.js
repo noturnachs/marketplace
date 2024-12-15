@@ -24,6 +24,8 @@ import courseheroHeader from "./assets/headers/coursehero.png";
 import vivamaxHeader from "./assets/headers/vivamax.png";
 import valorantHeader from "./assets/headers/valorant.png";
 import vyprvpnHeader from "./assets/headers/vyprvpn.png";
+import nordvpnHeader from "./assets/headers/nordvpn.png";
+import viuHeader from "./assets/headers/viu.png";
 // Import other headers here as needed
 
 export const listingHeaders = [
@@ -33,7 +35,17 @@ export const listingHeaders = [
     alt: "Gizmo Header",
   },
   {
-    keyword: "vyprvpn",
+    keyword: "viu",
+    image: viuHeader,
+    alt: "Viu Header",
+  },
+  {
+    keyword: "nord",
+    image: nordvpnHeader,
+    alt: "NordVPN Header",
+  },
+  {
+    keyword: "vypr",
     image: vyprvpnHeader,
     alt: "VyprVPN Header",
   },
