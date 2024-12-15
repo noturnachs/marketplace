@@ -11,6 +11,7 @@ function ColorCustomizer({ sellerId, onSave }) {
   const [activeColor, setActiveColor] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   useEffect(() => {
     const fetchColors = async () => {
@@ -55,67 +56,83 @@ function ColorCustomizer({ sellerId, onSave }) {
     }
   };
 
+  const toggleExpand = () => {
+    setIsExpanded((prev) => !prev);
+  };
+
   return (
-    <div className="bg-secondary/30 rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-textPrimary mb-4">
+    <div className="bg-[#17242f] rounded-lg p-6 mt-10">
+      <h2 className="text-lg font-semibold text-textPrimary mb-4 flex justify-between items-center">
         Customize Profile Colors
+        <button
+          onClick={toggleExpand}
+          className="text-sm text-textSecondary hover:text-textPrimary"
+        >
+          {isExpanded ? "Collapse" : "Expand"}
+        </button>
       </h2>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {Object.entries(colors).map(([key, value]) => (
-          <button
-            key={key}
-            onClick={() => setActiveColor(key)}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              activeColor === key
-                ? "border-accent"
-                : "border-transparent hover:border-accent/50"
-            }`}
-          >
-            <div
-              className="w-full h-12 rounded-md mb-2"
-              style={{ backgroundColor: value }}
-            />
-            <p className="text-sm text-textSecondary capitalize">
-              {key.replace("_", " ")}
-            </p>
-          </button>
-        ))}
-      </div>
-
-      {activeColor && (
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-sm text-textSecondary capitalize">
-              {activeColor.replace("_", " ")}
-            </p>
-            <button
-              onClick={() => setActiveColor(null)}
-              className="text-sm text-textSecondary hover:text-textPrimary"
-            >
-              Close
-            </button>
-          </div>
-          <HexColorPicker
-            color={colors[activeColor]}
-            onChange={handleColorChange}
-          />
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4">
-          <p className="text-sm text-red-500">{error}</p>
-        </div>
-      )}
-
-      <button
-        onClick={handleSave}
-        disabled={isLoading}
-        className="w-full px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent/90 transition-colors disabled:opacity-50"
+      <div
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${
+          isExpanded ? "max-h-screen" : "max-h-0"
+        }`}
       >
-        {isLoading ? "Saving..." : "Save Colors"}
-      </button>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {Object.entries(colors).map(([key, value]) => (
+            <button
+              key={key}
+              onClick={() => setActiveColor(key)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                activeColor === key
+                  ? "border-accent"
+                  : "border-transparent hover:border-accent/50"
+              }`}
+            >
+              <div
+                className="w-full h-12 rounded-md mb-2"
+                style={{ backgroundColor: value }}
+              />
+              <p className="text-sm text-textSecondary capitalize">
+                {key.replace("_", " ")}
+              </p>
+            </button>
+          ))}
+        </div>
+
+        {activeColor && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm text-textSecondary capitalize">
+                {activeColor.replace("_", " ")}
+              </p>
+              <button
+                onClick={() => setActiveColor(null)}
+                className="text-sm text-textSecondary hover:text-textPrimary"
+              >
+                Close
+              </button>
+            </div>
+            <HexColorPicker
+              color={colors[activeColor]}
+              onChange={handleColorChange}
+            />
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4">
+            <p className="text-sm text-red-500">{error}</p>
+          </div>
+        )}
+
+        <button
+          onClick={handleSave}
+          disabled={isLoading}
+          className="w-full px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent/90 transition-colors disabled:opacity-50"
+        >
+          {isLoading ? "Saving..." : "Save Colors"}
+        </button>
+      </div>
     </div>
   );
 }

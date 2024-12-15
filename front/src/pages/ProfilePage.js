@@ -28,7 +28,6 @@ function ProfilePage() {
   const [activeTab, setActiveTab] = useState(
     searchParams.get("tab") || "overview"
   );
-  const [isEditing, setIsEditing] = useState(false);
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -171,6 +170,12 @@ function ProfilePage() {
   const handleColorSave = () => {
     fetchData();
   };
+
+  useEffect(() => {
+    if (activeTab === "purchases") {
+      fetchPurchaseHistory();
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-primary">
@@ -400,205 +405,209 @@ function ProfilePage() {
 
           {/* Seller Profile Tab */}
           {activeTab === "seller profile" && !isSellerLoading && (
-            <div
-              className="space-y-6 rounded-lg px-4 py-8"
-              style={{ backgroundColor: seller?.primary_color }}
-            >
-              {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div
-                  className="rounded-lg p-6 text-center transition-all duration-200"
-                  style={{ backgroundColor: seller?.secondary_color }}
-                >
-                  <p
-                    className="text-4xl font-bold mb-1"
-                    style={{
-                      color: darkenHexColor(
-                        seller?.accent_color || "#000000",
-                        100
-                      ),
-                    }}
+            <>
+              <div
+                className="space-y-6 rounded-lg px-4 py-8"
+                style={{ backgroundColor: seller?.primary_color }}
+              >
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div
+                    className="rounded-lg p-6 text-center transition-all duration-200"
+                    style={{ backgroundColor: seller?.secondary_color }}
                   >
-                    {listings?.length || 0}
-                  </p>
-                  <p
-                    className="text-sm font-bold"
-                    style={{
-                      color: darkenHexColor(
-                        seller?.accent_color || "#000000",
-                        -20
-                      ),
-                    }}
+                    <p
+                      className="text-4xl font-bold mb-1"
+                      style={{
+                        color: darkenHexColor(
+                          seller?.accent_color || "#000000",
+                          100
+                        ),
+                      }}
+                    >
+                      {listings?.length || 0}
+                    </p>
+                    <p
+                      className="text-sm font-bold"
+                      style={{
+                        color: darkenHexColor(
+                          seller?.accent_color || "#000000",
+                          -20
+                        ),
+                      }}
+                    >
+                      Total Listings
+                    </p>
+                  </div>
+                  <div
+                    className="rounded-lg p-6 text-center transition-all duration-200"
+                    style={{ backgroundColor: seller?.secondary_color }}
                   >
-                    Total Listings
-                  </p>
+                    <p
+                      className="text-4xl font-bold mb-1"
+                      style={{
+                        color: darkenHexColor(
+                          seller?.accent_color || "#000000",
+                          100
+                        ),
+                      }}
+                    >
+                      {seller?.vouches || 0}
+                    </p>
+                    <p
+                      className="text-sm font-bold"
+                      style={{
+                        color: darkenHexColor(
+                          seller?.accent_color || "#000000",
+                          -20
+                        ),
+                      }}
+                    >
+                      Vouches
+                    </p>
+                  </div>
+                  <div
+                    className="rounded-lg p-6 text-center transition-all duration-200"
+                    style={{ backgroundColor: seller?.secondary_color }}
+                  >
+                    <p
+                      className="text-4xl font-bold mb-1"
+                      style={{
+                        color: darkenHexColor(
+                          seller?.accent_color || "#000000",
+                          100
+                        ),
+                      }}
+                    >
+                      {seller?.account_types?.length || 0}
+                    </p>
+                    <p
+                      className="text-sm font-bold"
+                      style={{
+                        color: darkenHexColor(
+                          seller?.accent_color || "#000000",
+                          -20
+                        ),
+                      }}
+                    >
+                      Account Types
+                    </p>
+                  </div>
                 </div>
-                <div
-                  className="rounded-lg p-6 text-center transition-all duration-200"
-                  style={{ backgroundColor: seller?.secondary_color }}
-                >
-                  <p
-                    className="text-4xl font-bold mb-1"
-                    style={{
-                      color: darkenHexColor(
-                        seller?.accent_color || "#000000",
-                        100
-                      ),
-                    }}
-                  >
-                    {seller?.vouches || 0}
-                  </p>
-                  <p
-                    className="text-sm font-bold"
-                    style={{
-                      color: darkenHexColor(
-                        seller?.accent_color || "#000000",
-                        -20
-                      ),
-                    }}
-                  >
-                    Vouches
-                  </p>
-                </div>
-                <div
-                  className="rounded-lg p-6 text-center transition-all duration-200"
-                  style={{ backgroundColor: seller?.secondary_color }}
-                >
-                  <p
-                    className="text-4xl font-bold mb-1"
-                    style={{
-                      color: darkenHexColor(
-                        seller?.accent_color || "#000000",
-                        100
-                      ),
-                    }}
-                  >
-                    {seller?.account_types?.length || 0}
-                  </p>
-                  <p
-                    className="text-sm font-bold"
-                    style={{
-                      color: darkenHexColor(
-                        seller?.accent_color || "#000000",
-                        -20
-                      ),
-                    }}
-                  >
-                    Account Types
-                  </p>
-                </div>
-              </div>
 
-              {/* Account Types Section */}
-              {seller?.account_types && seller.account_types.length > 0 && (
+                {/* Account Types Section */}
+                {seller?.account_types && seller.account_types.length > 0 && (
+                  <div
+                    className="rounded-lg p-6 transition-all duration-200"
+                    style={{ backgroundColor: seller?.secondary_color }}
+                  >
+                    <h2
+                      className="text-xl font-semibold mb-4"
+                      style={{ color: seller?.accent_color }}
+                    >
+                      Account Types
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {seller.account_types.map((type, index) => (
+                        <span
+                          key={index}
+                          className="px-4 py-2 rounded-full text-xs font-medium transition-all duration-200"
+                          style={{
+                            backgroundColor: darkenHexColor(
+                              seller?.accent_color || "#000000",
+                              100
+                            ),
+                          }}
+                        >
+                          <span
+                            className="font-bold"
+                            style={{ color: seller?.accent_color }}
+                          >
+                            {type}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Active Listings Section */}
                 <div
                   className="rounded-lg p-6 transition-all duration-200"
                   style={{ backgroundColor: seller?.secondary_color }}
                 >
                   <h2
-                    className="text-xl font-semibold mb-4"
+                    className="text-xl font-bold mb-4"
                     style={{ color: seller?.accent_color }}
                   >
-                    Account Types
+                    Active Listings
                   </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {seller.account_types.map((type, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 rounded-full text-xs font-medium transition-all duration-200"
+                  <div className="grid gap-4">
+                    {listings.map((listing) => (
+                      <div
+                        key={listing.id}
+                        className="rounded-lg p-4 transition-all duration-200 "
                         style={{
                           backgroundColor: darkenHexColor(
-                            seller?.accent_color || "#000000",
+                            seller?.accent_color,
                             100
                           ),
                         }}
+                        onClick={() => handleListingClick(listing.id)}
                       >
-                        <span
-                          className="font-bold"
-                          style={{ color: seller?.accent_color }}
-                        >
-                          {type}
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Active Listings Section */}
-              <div
-                className="rounded-lg p-6 transition-all duration-200"
-                style={{ backgroundColor: seller?.secondary_color }}
-              >
-                <h2
-                  className="text-xl font-bold mb-4"
-                  style={{ color: seller?.accent_color }}
-                >
-                  Active Listings
-                </h2>
-                <div className="grid gap-4">
-                  {listings.map((listing) => (
-                    <div
-                      key={listing.id}
-                      className="rounded-lg p-4 transition-all duration-200 "
-                      style={{
-                        backgroundColor: darkenHexColor(
-                          seller?.accent_color,
-                          100
-                        ),
-                      }}
-                      onClick={() => handleListingClick(listing.id)}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium mb-1">{listing.title}</h3>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium mb-1">
+                              {listing.title}
+                            </h3>
+                            <p
+                              className="text-xs p-2 rounded-lg opacity-80"
+                              style={{ backgroundColor: seller?.accent_color }}
+                            >
+                              {listing.description}
+                            </p>
+                          </div>
                           <p
-                            className="text-xs p-2 rounded-lg opacity-80"
-                            style={{ backgroundColor: seller?.accent_color }}
+                            className="font-bold"
+                            style={{
+                              color: darkenHexColor(seller?.accent_color, -20),
+                            }}
                           >
-                            {listing.description}
+                            ₱{listing.price}
                           </p>
                         </div>
-                        <p
-                          className="font-bold"
-                          style={{
-                            color: darkenHexColor(seller?.accent_color, -20),
-                          }}
-                        >
-                          ₱{listing.price}
-                        </p>
                       </div>
-                    </div>
-                  ))}
-                  {listings.length === 0 && (
-                    <p
-                      className="text-center py-4"
-                      style={{ color: seller?.secondary_color }}
-                    >
-                      No active listings
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Warning Message for No Vouches */}
-              {seller?.vouches === 0 && (
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-yellow-500">⚠️</span>
-                    <p className="text-yellow-500">
-                      Seller has no vouches, buy with care.
-                    </p>
+                    ))}
+                    {listings.length === 0 && (
+                      <p
+                        className="text-center py-4"
+                        style={{ color: seller?.secondary_color }}
+                      >
+                        No active listings
+                      </p>
+                    )}
                   </div>
                 </div>
-              )}
 
-              {/* Color Customizer */}
+                {/* Warning Message for No Vouches */}
+                {seller?.vouches === 0 && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-yellow-500">⚠️</span>
+                      <p className="text-yellow-500">
+                        Seller has no vouches, buy with care.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Color Customizer */}
+              </div>
               <ColorCustomizer
                 sellerId={userData.id}
                 onSave={handleColorSave}
               />
-            </div>
+            </>
           )}
           {activeTab === "seller profile" && isSellerLoading && (
             <div className="text-center py-4">Loading seller profile...</div>
@@ -732,43 +741,6 @@ function ProfilePage() {
 
           {/* Wallet Tab */}
           {activeTab === "wallet" && <UserWallet />}
-
-          {/* Settings Tab */}
-          {/* {activeTab === "settings" && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold text-textPrimary mb-4">
-                  Account Settings
-                </h2>
-                <div className="space-y-4">
-                  <button className="w-full p-4 bg-secondary/30 rounded-lg text-left hover:bg-secondary/40 transition-colors">
-                    <p className="text-sm font-medium text-textPrimary">
-                      Profile Information
-                    </p>
-                    <p className="text-xs text-textSecondary">
-                      Update your personal details
-                    </p>
-                  </button>
-                  <button className="w-full p-4 bg-secondary/30 rounded-lg text-left hover:bg-secondary/40 transition-colors">
-                    <p className="text-sm font-medium text-textPrimary">
-                      Security
-                    </p>
-                    <p className="text-xs text-textSecondary">
-                      Change password and security settings
-                    </p>
-                  </button>
-                  <button className="w-full p-4 bg-red-500/10 rounded-lg text-left hover:bg-red-500/20 transition-colors">
-                    <p className="text-sm font-medium text-red-500">
-                      Delete Account
-                    </p>
-                    <p className="text-xs text-red-500/80">
-                      Permanently delete your account
-                    </p>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )} */}
         </motion.div>
       </main>
     </div>
